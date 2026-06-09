@@ -102,3 +102,11 @@
 ## 2024-05-24 - Conditional Onboarding Callouts
 **Learning:** Returning users experience visual fatigue and "banner blindness" when presented with static onboarding instructions (like API key signup links) on every visit.
 **Action:** Extract static onboarding links from general descriptions into visually distinct callouts (e.g., `st.info` with an icon) and conditionally display them *only* when the required configuration (e.g., a default API key) is missing. This reduces clutter for returning users while providing clear guidance for new users.
+
+## 2024-06-27 - Softening Preliminary Validation
+**Learning:** Using an aggressive visual error (like `st.error` with a red 🛑 icon) for empty, required fields before the user has even attempted to submit the form feels hostile. It punishes users for an action they haven't yet taken.
+**Action:** For preliminary or incomplete validation states prior to form submission, prefer using softer visual feedback, such as `st.warning` (with a ⚠️ or 🔑 icon). This guides the user without making the UI feel combative or broken.
+
+## 2024-05-18 - Soften Preliminary Validation Warnings
+**Learning:** When providing preliminary inline validation feedback (e.g., when a form is loaded but an API key is missing or a field is empty before submission), using aggressive error styles (like st.error or a stop sign icon) feels hostile to users who havent even made a mistake yet.
+**Action:** Use softer st.warning styles and helpful icons for preliminary or empty-state validation, reserving st.error for actual invalid user input.

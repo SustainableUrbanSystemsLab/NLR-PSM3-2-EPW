@@ -192,7 +192,7 @@ def main():
             else:
                 st.warning("Default API key loaded (Unverified).", icon="⚠️")
         else:
-            st.error("No API key loaded. Please provide one in the API Key Configuration section.", icon="🛑")
+            st.warning("No API key loaded. Please provide one in the API Key Configuration section.", icon="⚠️")
 
     st.markdown("### Location & Time Details")
 
@@ -285,7 +285,10 @@ def main():
     year_warning = ""
 
     # Basic Year Validation
-    if year_str.isdigit():
+    if not year_str:
+        year_is_valid = False
+        year_warning = "A year or TMY identifier is required."
+    elif year_str.isdigit():
         year_int = int(year_str)
         if year_int in (current_year, current_year - 1):
             year_is_valid = False
@@ -296,8 +299,7 @@ def main():
         elif year_int < MIN_YEAR:
             year_is_valid = False
             year_warning = (
-                f"NLR does not provide data for the year {year}. "
-                f"The earliest year data is available for is {MIN_YEAR}."
+                f"NLR does not provide data for the year {year}. The earliest year data is available for is {MIN_YEAR}."
             )
     else:
         if not year_str.lower().startswith(("tmy", "tgy", "tdy")):
@@ -306,7 +308,7 @@ def main():
 
     if not year_is_valid:
         with col4:
-            st.error(year_warning, icon="⚠️")
+            st.warning(year_warning, icon="⚠️")
 
     if not api_key:
         button_help = "Please provide an API key in the configuration section to enable this button"
