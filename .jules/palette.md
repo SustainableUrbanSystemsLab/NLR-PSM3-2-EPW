@@ -110,3 +110,7 @@
 ## 2024-05-18 - Soften Preliminary Validation Warnings
 **Learning:** When providing preliminary inline validation feedback (e.g., when a form is loaded but an API key is missing or a field is empty before submission), using aggressive error styles (like st.error or a stop sign icon) feels hostile to users who havent even made a mistake yet.
 **Action:** Use softer st.warning styles and helpful icons for preliminary or empty-state validation, reserving st.error for actual invalid user input.
+
+## 2026-04-05 - Dynamic Output Filename Previews
+**Learning:** Users often lack visibility into how their inputs will affect the generated file until after they initiate the download process, leading to uncertainty and potential errors.
+**Action:** Implement real-time dynamic previews of the expected output filename directly beneath the relevant input fields. This provides immediate feedback and sets clear expectations before the user commits to an action.
