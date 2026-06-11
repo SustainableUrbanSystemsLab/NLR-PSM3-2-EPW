@@ -1,5 +1,6 @@
 import os
 import hashlib
+import re
 from datetime import datetime
 from importlib.metadata import version
 from typing import Optional
@@ -260,18 +261,18 @@ def main():
     col3, col4 = st.columns(2)
     with col3:
         location = st.text_input(
-            "Location Name",
+            "Location Name (required)",
             value=default_location,
             placeholder="e.g., Atlanta",
             max_chars=60,
         )
-        st.caption("📝 *Used to generate the output filename.*")
+        filename_preview_placeholder = st.empty()
         location_is_valid = bool(str(location).strip())
         if not location_is_valid:
             st.warning("A location name is required to generate the file.", icon="⚠️")
     with col4:
         year = st.text_input(
-            "Year",
+            "Year (required)",
             value="tmy",
             placeholder="e.g., 2012, tmy, tmy-2024",
             max_chars=15,
@@ -283,6 +284,11 @@ def main():
     year_str = str(year).strip()
     year_is_valid = True
     year_warning = ""
+
+    # Dynamic filename preview
+    safe_loc = re.sub(r"[^a-zA-Z0-9]", "_", str(location).strip()) if str(location).strip() else "Unnamed"
+    preview_name = f"{safe_loc}_{lat:.2f}_{lon:.2f}_{year_str or 'YYYY'}_{current_year}.epw"
+    filename_preview_placeholder.caption(f"📝 *Output filename:* `{preview_name}`")
 
     # Basic Year Validation
     if not year_str:
