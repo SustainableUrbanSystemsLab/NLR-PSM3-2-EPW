@@ -114,3 +114,7 @@
 ## 2026-04-05 - Dynamic Output Filename Previews
 **Learning:** Users often lack visibility into how their inputs will affect the generated file until after they initiate the download process, leading to uncertainty and potential errors.
 **Action:** Implement real-time dynamic previews of the expected output filename directly beneath the relevant input fields. This provides immediate feedback and sets clear expectations before the user commits to an action.
+
+## 2024-05-24 - Symmetrical Inline Guidance for Multi-Column Layouts
+**Learning:** When arranging form inputs in multi-column layouts (like `st.columns`), providing inline instructions (`st.caption`) for one field but not the adjacent field not only deprives the user of context but creates an unbalanced visual hierarchy.
+**Action:** Ensure symmetrical levels of inline guidance in multi-column layouts. If one column requires extensive explanation, provide at least a brief, helpful instruction for the adjacent column to maintain layout balance and improve overall form accessibility.

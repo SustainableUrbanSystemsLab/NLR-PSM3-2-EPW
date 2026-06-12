@@ -266,6 +266,7 @@ def main():
             placeholder="e.g., Atlanta",
             max_chars=60,
         )
+        st.caption("A descriptive name for the location, used to generate the output filename.")
         filename_preview_placeholder = st.empty()
         location_is_valid = bool(str(location).strip())
         if not location_is_valid:
