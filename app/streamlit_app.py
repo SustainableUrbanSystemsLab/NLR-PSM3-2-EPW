@@ -268,8 +268,6 @@ def main():
         )
         st.caption("A descriptive name for the location, used to generate the output filename.")
         location_is_valid = bool(str(location).strip())
-        if not location_is_valid:
-            st.warning("A location name is required to generate the file.", icon="⚠️")
     with col4:
         year = st.text_input(
             "Year (required)",
@@ -312,9 +310,12 @@ def main():
             year_is_valid = False
             year_warning = "Year must be a numeric year (>=1998) or a TMY name like tmy or tmy-2024."
 
+    # Full-width validation warnings below inputs
+    if not location_is_valid:
+        st.warning("A location name is required to generate the file.", icon="⚠️")
+
     if not year_is_valid:
-        with col4:
-            st.warning(year_warning, icon="⚠️")
+        st.warning(year_warning, icon="⚠️")
 
     if not api_key:
         button_help = "Please provide an API key in the configuration section to enable this button"

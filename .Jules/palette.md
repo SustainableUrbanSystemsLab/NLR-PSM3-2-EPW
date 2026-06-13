@@ -1,3 +1,6 @@
 ## 2024-05-24 - Accessibility Heading Hierarchy & State Preview Placement
 **Learning:** Avoid skipping heading levels (e.g., from `h1` to `h3`) as it breaks WCAG 1.3.1 guidelines and confuses screen reader users who rely on heading structure for document navigation. Furthermore, when a visual preview (like an output filename) depends on multiple inputs spread across columns, placing it inside one of the columns creates a disjointed mental model and breaks visual flow on mobile layouts.
 **Action:** Always maintain sequential heading levels (`h1` -> `h2` -> `h3`). Always place dependent state previews chronologically *after* all the inputs that affect it, ensuring a clear summary before the primary action button.
+## 2024-05-25 - Form Validation Layout in Columns
+**Learning:** Rendering text-heavy validation messages (like `st.warning` or `st.error`) inside specific layout columns (e.g., `st.columns`) squishes the text. This not only creates an unbalanced visual hierarchy compared to sibling columns but severely degrades readability on mobile devices where columns become exceptionally narrow before collapsing.
+**Action:** Always extract and render dynamic form validation feedback chronologically outside and below the column containers, ensuring they span full-width directly above the primary submission action.
