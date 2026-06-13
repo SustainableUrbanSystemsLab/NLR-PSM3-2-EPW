@@ -195,7 +195,7 @@ def main():
         else:
             st.warning("No API key loaded. Please provide one in the API Key Configuration section.", icon="⚠️")
 
-    st.markdown("### Location & Time Details")
+    st.markdown("## Location & Time Details")
 
     # Show a map to pick lat/lon
     st.write("Select a location on the map, or enter coordinates manually:")
@@ -267,7 +267,6 @@ def main():
             max_chars=60,
         )
         st.caption("A descriptive name for the location, used to generate the output filename.")
-        filename_preview_placeholder = st.empty()
         location_is_valid = bool(str(location).strip())
         if not location_is_valid:
             st.warning("A location name is required to generate the file.", icon="⚠️")
@@ -289,7 +288,7 @@ def main():
     # Dynamic filename preview
     safe_loc = re.sub(r"[^a-zA-Z0-9]", "_", str(location).strip()) if str(location).strip() else "Unnamed"
     preview_name = f"{safe_loc}_{lat:.2f}_{lon:.2f}_{year_str or 'YYYY'}_{current_year}.epw"
-    filename_preview_placeholder.caption(f"📝 *Output filename:* `{preview_name}`")
+    st.caption(f"📝 *Output filename:* `{preview_name}`")
 
     # Basic Year Validation
     if not year_str:
