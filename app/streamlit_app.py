@@ -267,6 +267,7 @@ def main():
             max_chars=60,
         )
         st.caption("A descriptive name for the location, used to generate the output filename.")
+        st.caption("💡 *Auto-updates when you select a new location on the map.*")
         location_is_valid = bool(str(location).strip())
     with col4:
         year = st.text_input(
@@ -294,11 +295,11 @@ def main():
         year_warning = "A year or TMY identifier is required."
     elif year_str.isdigit():
         year_int = int(year_str)
-        if year_int in (current_year, current_year - 1):
+        if year_int >= current_year - 1:
             year_is_valid = False
             year_warning = (
-                f"NLR does not provide data for the current year {year}. "
-                f"It is also unlikely that there is data availability for {year_int - 1}."
+                f"NLR does not provide data for the year {year}. "
+                f"Data is typically only available up to {current_year - 2}."
             )
         elif year_int < MIN_YEAR:
             year_is_valid = False

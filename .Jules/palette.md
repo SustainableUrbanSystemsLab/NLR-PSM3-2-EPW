@@ -4,3 +4,6 @@
 ## 2024-05-25 - Form Validation Layout in Columns
 **Learning:** Rendering text-heavy validation messages (like `st.warning` or `st.error`) inside specific layout columns (e.g., `st.columns`) squishes the text. This not only creates an unbalanced visual hierarchy compared to sibling columns but severely degrades readability on mobile devices where columns become exceptionally narrow before collapsing.
 **Action:** Always extract and render dynamic form validation feedback chronologically outside and below the column containers, ensuring they span full-width directly above the primary submission action.
+## 2024-06-14 - Visual Symmetry in Multi-column Layouts & Proactive Future Validation
+**Learning:** In Streamlit multi-column layouts, providing instructions for one column but not another creates an unbalanced visual hierarchy and breaks form consistency. Furthermore, missing proactive validation for future dates leads to confusing downstream API errors.
+**Action:** Always ensure symmetrical levels of inline guidance (e.g., `st.caption`) beneath inputs across adjacent columns. Always provide proactive inline validation for impossible inputs (like future years) to prevent unnecessary network requests and confusing errors.
