@@ -195,10 +195,10 @@ def main():
         else:
             st.warning("No API key loaded. Please provide one in the API Key Configuration section.", icon="⚠️")
 
-    st.markdown("## Location & Time Details")
+    st.header("Location & Time Details", divider="gray")
 
     # Show a map to pick lat/lon
-    st.write("Select a location on the map, or enter coordinates manually:")
+    st.info("**Tip:** Select a location on the map, or enter coordinates manually in the fields provided.", icon="🗺️")
     m = get_map()
 
     # Bolt Optimization:
