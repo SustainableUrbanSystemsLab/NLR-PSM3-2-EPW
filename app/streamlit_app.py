@@ -137,7 +137,7 @@ def main():
     st.markdown(f"""
     # NLR-PSM3-2-EPW  `v{__version__}`
 
-    This script converts climate data from NLR to the EnergyPlus EPW format.
+    This script converts climate data from NLR to the EnergyPlus Weather (EPW) format.
     """)
 
     # API Key Handling
@@ -239,7 +239,7 @@ def main():
     col1, col2 = st.columns(2)
     with col1:
         lat = st.number_input(
-            "Latitude",
+            "Latitude (required)",
             min_value=-90.0,
             max_value=90.0,
             value=float(default_lat),
@@ -249,7 +249,7 @@ def main():
         st.caption("Latitude of the location in decimal degrees (e.g., 33.770)")
     with col2:
         lon = st.number_input(
-            "Longitude",
+            "Longitude (required)",
             min_value=-180.0,
             max_value=180.0,
             value=float(default_lon),
@@ -397,7 +397,10 @@ def main():
                 icon="📊",
             )
         else:
-            st.error("Please make sure that NLR is able to deliver data for the location and year you provided.")
+            st.error(
+                "Data unavailable for this location and year. Please verify coverage or try a different year.",
+                icon="❌",
+            )
         st.stop()
 
 
