@@ -155,9 +155,7 @@ def main():
     api_key_source = "none"
 
     with st.expander("🔑 API Key Configuration", expanded=not bool(default_api_key)):
-        label = (
-            "Provide your own NLR API key (optional):" if default_api_key else "Provide your NLR API key (required):"
-        )
+        label = "Provide your own NLR API key (optional)" if default_api_key else "Provide your NLR API key (required)"
         help_text = (
             "Overrides the default API key if provided."
             if default_api_key
@@ -366,8 +364,11 @@ def main():
             file_size_mb = os.path.getsize(file_name) / (1024 * 1024)
             with open(file_name, "rb") as f:
                 s = f.read()
+
+            with st.container(border=True):
                 st.success(
-                    f"Data successfully processed! Your EPW file (**{os.path.basename(file_name)}**) is ready for download ({file_size_mb:.2f} MB)."
+                    f"Data successfully processed! Your EPW file (**{os.path.basename(file_name)}**) is ready for download ({file_size_mb:.2f} MB).",
+                    icon="✅",
                 )
 
                 with st.expander("👀 Preview File Contents (First 10 Lines)"):

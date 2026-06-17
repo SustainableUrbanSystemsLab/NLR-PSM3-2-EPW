@@ -13,3 +13,6 @@
 ## 2025-02-12 - Error Message Actionability and Visual Symmetry
 **Learning:** Generic error messages (like "make sure the data is available") lack actionability and lead to user frustration. Also, inconsistent label formatting across inputs in multi-column layouts (like marking some inputs as "required" but not others, even if they inherently are) creates visual asymmetry and confuses user expectations.
 **Action:** Always provide actionable troubleshooting steps inside error messages with appropriate icons (e.g. `icon="❌"`). Ensure visual symmetry by making all required fields explicitly indicate "(required)" in their labels if other fields do, even if the input component inherently requires a value.
+## 2025-02-12 - Visual Hierarchy and Grouping Post-Submission Results
+**Learning:** Rendering post-submission success feedback, dynamic file previews, and primary download actions as flat, unassociated siblings creates a disjointed mental model and breaks the visual flow at the end of a form.
+**Action:** Always wrap related generated output states (e.g., success messages, file preview expanders, and download buttons) inside a unified `st.container(border=True)` block. This creates a cohesive "Result Card" component, significantly improving visual hierarchy and clearly grouping the outcome of the user's action.
