@@ -16,3 +16,6 @@
 ## 2025-02-12 - Visual Hierarchy and Grouping Post-Submission Results
 **Learning:** Rendering post-submission success feedback, dynamic file previews, and primary download actions as flat, unassociated siblings creates a disjointed mental model and breaks the visual flow at the end of a form.
 **Action:** Always wrap related generated output states (e.g., success messages, file preview expanders, and download buttons) inside a unified `st.container(border=True)` block. This creates a cohesive "Result Card" component, significantly improving visual hierarchy and clearly grouping the outcome of the user's action.
+## 2025-02-12 - Bi-directional Synchronization of Interactive Components
+**Learning:** When interactive components (like maps) are used alongside manual input fields (like lat/lon number inputs) to represent the same state, they must remain perfectly synchronized in both directions. Failing to update the visual component when the user changes the text inputs creates a disjointed mental model, as the map appears stuck in an old state.
+**Action:** Always utilize session state and bi-directional bindings (e.g., passing dynamic parameters like `center` and utilizing `key` bindings) to ensure visual components and text inputs reflect a single source of truth across all user interactions.

@@ -199,58 +199,74 @@ def main():
     st.info("**Tip:** Select a location on the map, or enter coordinates manually in the fields provided.", icon="🗺️")
     m = get_map()
 
+    # Initialize session state for lat/lon if they don't exist
+    if "input_lat" not in st.session_state:
+        st.session_state.input_lat = 33.770
+    if "input_lon" not in st.session_state:
+        st.session_state.input_lon = -84.3824
+
+    # Default location string
+    default_location = "Atlanta"
+
     # Bolt Optimization:
     # Use returned_objects=["last_clicked"] to prevent Streamlit from completely rerunning
     # the entire Python backend and frontend UI every time the user pans or zooms the map.
-    map_data = st_folium(m, height=400, use_container_width=True, returned_objects=["last_clicked"])
-
-    # Initialize lat/lon with defaults
-    default_lat = 33.770
-    default_lon = -84.3824
-    default_location = "Atlanta"
+    map_data = st_folium(
+        m,
+        center=[st.session_state.input_lat, st.session_state.input_lon],
+        height=400,
+        use_container_width=True,
+        returned_objects=["last_clicked"],
+    )
 
     # Update lat/lon from map click if available
     if map_data and map_data.get("last_clicked"):
-        default_lat = map_data["last_clicked"]["lat"]
-        default_lon = map_data["last_clicked"]["lng"]
+        click_lat = map_data["last_clicked"]["lat"]
+        click_lon = map_data["last_clicked"]["lng"]
 
-        # Reverse geocode the location
-        loc_name = get_location_name(default_lat, default_lon)
-        if loc_name != "Unknown Location":
-            default_location = loc_name
-        else:
-            default_location = ""
-
-        # UX Improvement: Provide subtle toast feedback when a new location is clicked on the map
-        click_id = f"{default_lat}-{default_lon}"
+        click_id = f"{click_lat}-{click_lon}"
         prev_click_id = st.session_state.get("last_map_click")
-        if prev_click_id is not None and prev_click_id != click_id:
+
+        # If this is a new map click, update session state and rerun to sync inputs
+        if prev_click_id != click_id:
+            st.session_state["last_map_click"] = click_id
+            st.session_state.input_lat = float(click_lat)
+            st.session_state.input_lon = float(click_lon)
+
+            # Reverse geocode the location
+            loc_name = get_location_name(click_lat, click_lon)
             if loc_name != "Unknown Location":
                 st.toast(f"Location updated to **{loc_name}**", icon="📍")
             else:
-                st.toast(
-                    f"Location updated to coordinates: {default_lat:.4f}, {default_lon:.4f}",
-                    icon="📍",
-                )
-        st.session_state["last_map_click"] = click_id
+                st.toast(f"Location updated to coordinates: {click_lat:.4f}, {click_lon:.4f}", icon="📍")
+
+            st.rerun()
+
+    lat = st.session_state.input_lat
+    lon = st.session_state.input_lon
+
+    # Check if current lat/lon differs from default before reverse geocoding to pre-fill location input
+    if lat != 33.770 or lon != -84.3824:
+        loc_name = get_location_name(lat, lon)
+        default_location = loc_name if loc_name != "Unknown Location" else ""
 
     col1, col2 = st.columns(2)
     with col1:
-        lat = st.number_input(
+        st.number_input(
             "Latitude (required)",
             min_value=-90.0,
             max_value=90.0,
-            value=float(default_lat),
+            key="input_lat",
             format="%.4f",
             step=0.0001,
         )
         st.caption("Latitude of the location in decimal degrees (e.g., 33.770)")
     with col2:
-        lon = st.number_input(
+        st.number_input(
             "Longitude (required)",
             min_value=-180.0,
             max_value=180.0,
-            value=float(default_lon),
+            key="input_lon",
             format="%.4f",
             step=0.0001,
         )
