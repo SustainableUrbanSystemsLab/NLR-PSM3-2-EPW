@@ -134,11 +134,9 @@ def get_map():
 
 def main():
     st.set_page_config(page_title="NLR to EPW", page_icon="☀️")
-    st.markdown(f"""
-    # NLR-PSM3-2-EPW  `v{__version__}`
-
-    This script converts climate data from NLR to the EnergyPlus Weather (EPW) format.
-    """)
+    st.title("NLR-PSM3-2-EPW")
+    st.caption(f"**Version {__version__}**")
+    st.markdown("This script converts climate data from NLR to the EnergyPlus Weather (EPW) format.")
 
     # API Key Handling
     default_api_key = _load_api_key()
@@ -369,7 +367,9 @@ def main():
                     LEAP_YEAR,
                 )
             except Exception as exc:
-                st.error(f"Request failed: {exc}")
+                st.error("Request failed: The data could not be retrieved from NLR.", icon="❌")
+                with st.expander("🛠️ View technical details"):
+                    st.code(str(exc), language="text")
                 if api_key_source == "default":
                     st.info(
                         "If this failure is related to the default API key, enter your own key in the API Key Configuration section and retry."
