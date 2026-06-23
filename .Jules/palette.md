@@ -22,3 +22,7 @@
 ## 2025-02-13 - Graceful Error Degradation & Semantic Typography
 **Learning:** Exposing raw Python exception strings (which often contain verbose URLs, stack traces, and massive JSON payloads) directly in `st.error` violates heuristic evaluation principles for user-friendly error messages and overwhelms non-technical users. Furthermore, using raw markdown headings like `st.markdown("# Title")` injects semantic HTML `H1` tags but often entangles irrelevant metadata (like version strings), creating confusing navigation for screen readers.
 **Action:** Always provide concise, user-centric error summaries in `st.error` and hide technical details (like raw exception strings) behind a collapsed `st.expander` for developers. Always use dedicated semantic functions like `st.title()` and `st.caption()` to cleanly separate primary page structure from secondary metadata.
+
+## 2025-02-14 - Button Tooltips on Mobile
+**Learning:** Hiding critical validation instructions inside a button's `help` parameter (tooltips) makes them completely inaccessible on mobile devices, preventing users from understanding why a button is disabled.
+**Action:** Avoid relying on the `help` parameter for critical disabled-state instructions. Always provide explicit, persistently visible text (like `st.warning` or `st.caption`) in the main UI flow.
