@@ -155,9 +155,9 @@ def main():
     with st.expander("🔑 API Key Configuration", expanded=not bool(default_api_key)):
         label = "Provide your own NLR API key (optional)" if default_api_key else "Provide your NLR API key (required)"
         help_text = (
-            "Overrides the default API key if provided."
+            f"Overrides the default API key if provided. You can [request a free NLR API key]({DEVELOPER_SIGNUP_URL}) if needed."
             if default_api_key
-            else "An NLR API key is strictly required to request data."
+            else f"An NLR API key is strictly required to request data. You can [request a free NLR API key]({DEVELOPER_SIGNUP_URL})."
         )
         api_key_override = st.text_input(
             label,
@@ -311,13 +311,11 @@ def main():
             year_is_valid = False
             year_warning = (
                 f"NLR does not provide data for the year {year}. "
-                f"Data is typically only available up to {current_year - 2}."
+                f"Data is typically only available up to {current_year - 2}. Please enter an earlier year."
             )
         elif year_int < MIN_YEAR:
             year_is_valid = False
-            year_warning = (
-                f"NLR does not provide data for the year {year}. The earliest year data is available for is {MIN_YEAR}."
-            )
+            year_warning = f"NLR does not provide data for the year {year}. The earliest year data is available for is {MIN_YEAR}. Please enter a more recent year."
     else:
         if not year_str.lower().startswith(("tmy", "tgy", "tdy")):
             year_is_valid = False
@@ -330,20 +328,15 @@ def main():
     if not year_is_valid:
         st.warning(year_warning, icon="⚠️")
 
+    if not location_is_valid:
+        st.warning("Please provide a valid location name.", icon="📍")
+
     if not api_key:
-        button_help = "Please provide an API key in the configuration section to enable this button"
         st.warning("Please provide an API key in the 'API Key Configuration' section to request data.", icon="🔑")
-    elif not year_is_valid:
-        button_help = year_warning
-    elif not location_is_valid:
-        button_help = "Please provide a valid location name."
-    else:
-        button_help = "Initiates request to NLR API to download EPW file"
 
     if st.button(
         "Request from NLR",
         type="primary",
-        help=button_help,
         disabled=not bool(api_key) or not year_is_valid or not location_is_valid,
         icon=":material/cloud_download:",
         use_container_width=True,
@@ -372,7 +365,8 @@ def main():
                     st.code(str(exc), language="text")
                 if api_key_source == "default":
                     st.info(
-                        "If this failure is related to the default API key, enter your own key in the API Key Configuration section and retry."
+                        "If this failure is related to the default API key, enter your own key in the API Key Configuration section and retry.",
+                        icon="💡",
                     )
                 st.stop()
 
