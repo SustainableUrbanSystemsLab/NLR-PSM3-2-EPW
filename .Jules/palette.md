@@ -26,3 +26,6 @@
 ## 2025-02-14 - Button Tooltips on Mobile
 **Learning:** Hiding critical validation instructions inside a button's `help` parameter (tooltips) makes them completely inaccessible on mobile devices, preventing users from understanding why a button is disabled.
 **Action:** Avoid relying on the `help` parameter for critical disabled-state instructions. Always provide explicit, persistently visible text (like `st.warning` or `st.caption`) in the main UI flow.
+## 2025-02-20 - Context-Aware Troubleshooting and Reducing Visual Clutter
+**Learning:** Duplicate error messages or warnings clutter the UI and increase cognitive load. Furthermore, generic troubleshooting guidance fails to assist users who are in specific states (e.g., using a custom API key vs. a default one). Providing irrelevant advice based on the wrong context leads to user frustration.
+**Action:** Always verify that form validation messages are uniquely presented. Always tailor troubleshooting advice in error messages based on the active user context (e.g., advising custom API key users to check their portal instead of advising them to enter a custom key).
