@@ -328,9 +328,6 @@ def main():
     if not year_is_valid:
         st.warning(year_warning, icon="⚠️")
 
-    if not location_is_valid:
-        st.warning("Please provide a valid location name.", icon="📍")
-
     if not api_key:
         st.warning("Please provide an API key in the 'API Key Configuration' section to request data.", icon="🔑")
 
@@ -366,6 +363,11 @@ def main():
                 if api_key_source == "default":
                     st.info(
                         "If this failure is related to the default API key, enter your own key in the API Key Configuration section and retry.",
+                        icon="💡",
+                    )
+                elif api_key_source == "user":
+                    st.info(
+                        "Please verify that your custom API key is correct and active. You can check your account at the NLR Developer portal.",
                         icon="💡",
                     )
                 st.stop()
