@@ -29,3 +29,6 @@
 ## 2025-02-20 - Context-Aware Troubleshooting and Reducing Visual Clutter
 **Learning:** Duplicate error messages or warnings clutter the UI and increase cognitive load. Furthermore, generic troubleshooting guidance fails to assist users who are in specific states (e.g., using a custom API key vs. a default one). Providing irrelevant advice based on the wrong context leads to user frustration.
 **Action:** Always verify that form validation messages are uniquely presented. Always tailor troubleshooting advice in error messages based on the active user context (e.g., advising custom API key users to check their portal instead of advising them to enter a custom key).
+## 2025-02-20 - Placeholder Context in Number Inputs
+**Learning:** Using `st.number_input` without providing `placeholder` text requires the user to infer the expected formatting of the required data. This increases cognitive load, especially when handling specific numerical patterns like coordinates.
+**Action:** Always provide explicit `placeholder` text (e.g., `placeholder="33.7700"`) for numeric inputs where possible to immediately demonstrate the expected format and establish clear expectations before data entry.

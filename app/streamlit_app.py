@@ -257,6 +257,7 @@ def main():
             key="input_lat",
             format="%.4f",
             step=0.0001,
+            placeholder="33.7700",
         )
         st.caption("Latitude of the location in decimal degrees (e.g., 33.770)")
     with col2:
@@ -267,6 +268,7 @@ def main():
             key="input_lon",
             format="%.4f",
             step=0.0001,
+            placeholder="-84.3824",
         )
         st.caption("Longitude of the location in decimal degrees (e.g., -84.3824)")
 
