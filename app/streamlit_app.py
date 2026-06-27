@@ -187,7 +187,10 @@ def main():
             if key_hash == VALID_API_KEY_HASH:
                 st.success("Default API key loaded (Verified).", icon="✅")
             else:
-                st.warning("Default API key loaded (Unverified).", icon="⚠️")
+                st.warning(
+                    "Default API key loaded (Unverified). Please verify the key in your .streamlit/secrets.toml file.",
+                    icon="⚠️",
+                )
         else:
             st.warning("No API key loaded. Please provide one in the API Key Configuration section.", icon="⚠️")
 

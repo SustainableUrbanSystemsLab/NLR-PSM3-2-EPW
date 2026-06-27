@@ -32,3 +32,6 @@
 ## 2025-02-20 - Placeholder Context in Number Inputs
 **Learning:** Using `st.number_input` without providing `placeholder` text requires the user to infer the expected formatting of the required data. This increases cognitive load, especially when handling specific numerical patterns like coordinates.
 **Action:** Always provide explicit `placeholder` text (e.g., `placeholder="33.7700"`) for numeric inputs where possible to immediately demonstrate the expected format and establish clear expectations before data entry.
+## 2025-06-27 - Actionable Instructions for State-based Warnings
+**Learning:** State-based warnings (like "Unverified" status) without actionable recovery instructions create dead-ends for users, leading to frustration. Simply stating that something is wrong isn't enough.
+**Action:** Always append specific, contextual troubleshooting steps (e.g., directing them to check the relevant configuration file or external service) to state-based warnings to facilitate user recovery and reduce cognitive load.
