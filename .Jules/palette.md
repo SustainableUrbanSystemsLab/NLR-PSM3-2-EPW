@@ -38,3 +38,6 @@
 ## 2025-06-28 - Proactive Expansion of Validation Containers
 **Learning:** Hiding critical validation warnings inside collapsed containers (like `st.expander`) prevents users from noticing errors related to default configurations, leading to confusion when subsequent actions fail silently or unexpectedly.
 **Action:** Always proactively expand containers (e.g., setting `expanded=True`) if they contain an invalid state or a critical warning that requires user attention, ensuring the feedback is immediately visible.
+## 2025-02-23 - Postel's Law and Visual Clutter
+**Learning:** Failing to strip whitespace from sensitive inputs (like API keys) causes frustrating failures when users accidentally copy spaces. Additionally, duplicating validation warnings across the UI increases visual clutter and cognitive load.
+**Action:** Always apply Postel's Law by sanitizing inputs (e.g., `strip()`) before validation. Always ensure validation warnings are uniquely presented to minimize UI clutter.
