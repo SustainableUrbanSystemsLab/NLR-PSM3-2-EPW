@@ -35,3 +35,6 @@
 ## 2025-06-27 - Actionable Instructions for State-based Warnings
 **Learning:** State-based warnings (like "Unverified" status) without actionable recovery instructions create dead-ends for users, leading to frustration. Simply stating that something is wrong isn't enough.
 **Action:** Always append specific, contextual troubleshooting steps (e.g., directing them to check the relevant configuration file or external service) to state-based warnings to facilitate user recovery and reduce cognitive load.
+## 2025-06-28 - Proactive Expansion of Validation Containers
+**Learning:** Hiding critical validation warnings inside collapsed containers (like `st.expander`) prevents users from noticing errors related to default configurations, leading to confusion when subsequent actions fail silently or unexpectedly.
+**Action:** Always proactively expand containers (e.g., setting `expanded=True`) if they contain an invalid state or a critical warning that requires user attention, ensuring the feedback is immediately visible.

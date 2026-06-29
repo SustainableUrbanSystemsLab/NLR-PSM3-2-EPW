@@ -152,7 +152,14 @@ def main():
     api_key = ""
     api_key_source = "none"
 
-    with st.expander("🔑 API Key Configuration", expanded=not bool(default_api_key)):
+    # Proactively expand the configuration section if the default key is unverified
+    # so the user actually sees the warning instead of having it hidden.
+    is_default_key_unverified = False
+    if default_api_key:
+        if hashlib.sha256(default_api_key.strip().encode()).hexdigest() != VALID_API_KEY_HASH:
+            is_default_key_unverified = True
+
+    with st.expander("🔑 API Key Configuration", expanded=not bool(default_api_key) or is_default_key_unverified):
         label = "Provide your own NLR API key (optional)" if default_api_key else "Provide your NLR API key (required)"
         help_text = (
             f"Overrides the default API key if provided. You can [request a free NLR API key]({DEVELOPER_SIGNUP_URL}) if needed."
