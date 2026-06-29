@@ -176,11 +176,11 @@ def main():
         st.caption(help_text)
 
         if api_key_override:
-            api_key = api_key_override
+            api_key = api_key_override.strip()
             api_key_source = "user"
-            if len(api_key.strip()) != 40:
+            if len(api_key) != 40:
                 st.warning(
-                    "User API key loaded, but it is not 40 characters long. NLR keys are typically exactly 40 characters.",
+                    "User API key loaded, but it is not 40 characters long. Please verify the entire key was copied correctly.",
                     icon="⚠️",
                 )
             else:
@@ -198,8 +198,6 @@ def main():
                     "Default API key loaded (Unverified). Please verify the key in your .streamlit/secrets.toml file.",
                     icon="⚠️",
                 )
-        else:
-            st.warning("No API key loaded. Please provide one in the API Key Configuration section.", icon="⚠️")
 
     st.header("Location & Time Details", divider="gray")
 
