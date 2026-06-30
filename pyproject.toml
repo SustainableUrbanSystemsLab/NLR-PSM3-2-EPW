@@ -53,6 +53,27 @@ version_toml = [
     "pyproject.toml:project.version",
 ]
 build_command = "pip install build && python -m build"
+# This project's commits use gitmoji (the Palette/Jules bot emits "🎨 …"),
+# not Conventional Commits, so the default "conventional" parser matched
+# nothing and no release was ever cut (frozen at 0.5.0). Use the emoji parser.
+commit_parser = "emoji"
+
+[tool.semantic_release.commit_parser_options]
+major_tags = ["💥"]
+minor_tags = ["✨", "🎉", "🚀", "💫", "🌟"]
+patch_tags = [
+    "🎨",  # :art: structure/format — Palette UI commits
+    "🐛",  # :bug:
+    "🚑",  # :ambulance: hotfix
+    "⚡️", "⚡",  # :zap: performance — Bolt commits
+    "🔒", "🔐",  # :lock: security
+    "♻️",  # :recycle: refactor
+    "🔧",  # :wrench: config
+    "📝",  # :memo: docs
+    "💄",  # :lipstick: UI/style
+    "🩹",  # :adhesive_bandage: minor fix
+    "⬆️", "⬇️", "📌",  # dependency bumps / pins
+]
 
 [tool.semantic_release.branches.main]
 match = "(main|master)"
