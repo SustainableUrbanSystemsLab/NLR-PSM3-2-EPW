@@ -1,5 +1,4 @@
 import os
-import hashlib
 import re
 from datetime import datetime
 from importlib.metadata import version
@@ -14,6 +13,12 @@ __version__ = version("nlr-psm3-2-epw")
 
 from nlr_psm3_2_epw.assets import download_epw
 from nlr_psm3_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL
+from nlr_psm3_2_epw.validation import (
+    API_KEY_LENGTH,
+    is_api_key_valid,
+    is_api_key_verified,
+    normalize_api_key,
+)
 
 # --- CONSTANTS ---
 ATTRIBUTES = (
@@ -152,12 +157,10 @@ def main():
     api_key = ""
     api_key_source = "none"
 
-    # Proactively expand the configuration section if the default key is unverified
-    # so the user actually sees the warning instead of having it hidden.
-    is_default_key_unverified = False
-    if default_api_key:
-        if hashlib.sha256(default_api_key.strip().encode()).hexdigest() != VALID_API_KEY_HASH:
-            is_default_key_unverified = True
+    # Verify the default key once, up front: it drives both the auto-expand
+    # behaviour below and the request-button validity further down.
+    default_key_verified = is_api_key_verified(default_api_key, VALID_API_KEY_HASH)
+    is_default_key_unverified = bool(default_api_key) and not default_key_verified
 
     with st.expander("🔑 API Key Configuration", expanded=not bool(default_api_key) or is_default_key_unverified):
         label = "Provide your own NLR API key (optional)" if default_api_key else "Provide your NLR API key (required)"
@@ -176,17 +179,15 @@ def main():
         st.caption(help_text)
 
         if api_key_override:
-            api_key = api_key_override.strip()
+            api_key = normalize_api_key(api_key_override)
             api_key_source = "user"
-            if len(api_key) == 40:
+            if len(api_key) == API_KEY_LENGTH:
                 st.success("User API key loaded.", icon="✅")
         elif default_api_key:
-            api_key = default_api_key
+            api_key = normalize_api_key(default_api_key)
             api_key_source = "default"
 
-            # Verify Hash
-            key_hash = hashlib.sha256(api_key.strip().encode()).hexdigest()
-            if key_hash == VALID_API_KEY_HASH:
+            if default_key_verified:
                 st.success("Default API key loaded (Verified).", icon="✅")
             else:
                 st.warning(
@@ -326,7 +327,11 @@ def main():
             year_is_valid = False
             year_warning = "Year must be a numeric year (>=1998) or a TMY name like tmy or tmy-2024."
 
-    api_key_is_valid = bool(api_key) and len(api_key) == 40
+    # A verified default key is usable regardless of length; any other key must
+    # be exactly API_KEY_LENGTH characters (whitespace already trimmed on load).
+    api_key_is_valid = is_api_key_valid(
+        api_key, is_verified=(api_key_source == "default" and default_key_verified)
+    )
 
     # Full-width validation warnings below inputs
     if not location_is_valid:
