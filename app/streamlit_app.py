@@ -178,12 +178,7 @@ def main():
         if api_key_override:
             api_key = api_key_override.strip()
             api_key_source = "user"
-            if len(api_key) != 40:
-                st.warning(
-                    "User API key loaded, but it is not 40 characters long. Please verify the entire key was copied correctly.",
-                    icon="⚠️",
-                )
-            else:
+            if len(api_key) == 40:
                 st.success("User API key loaded.", icon="✅")
         elif default_api_key:
             api_key = default_api_key
@@ -331,6 +326,8 @@ def main():
             year_is_valid = False
             year_warning = "Year must be a numeric year (>=1998) or a TMY name like tmy or tmy-2024."
 
+    api_key_is_valid = bool(api_key) and len(api_key) == 40
+
     # Full-width validation warnings below inputs
     if not location_is_valid:
         st.warning("A location name is required to generate the file.", icon="⚠️")
@@ -340,11 +337,13 @@ def main():
 
     if not api_key:
         st.warning("Please provide an API key in the 'API Key Configuration' section to request data.", icon="🔑")
+    elif not api_key_is_valid:
+        st.warning("The provided API key must be exactly 40 characters long to request data.", icon="⚠️")
 
     if st.button(
         "Request from NLR",
         type="primary",
-        disabled=not bool(api_key) or not year_is_valid or not location_is_valid,
+        disabled=not api_key_is_valid or not year_is_valid or not location_is_valid,
         icon=":material/cloud_download:",
         use_container_width=True,
     ):

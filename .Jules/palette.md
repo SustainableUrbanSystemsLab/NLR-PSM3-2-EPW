@@ -41,3 +41,6 @@
 ## 2025-02-23 - Postel's Law and Visual Clutter
 **Learning:** Failing to strip whitespace from sensitive inputs (like API keys) causes frustrating failures when users accidentally copy spaces. Additionally, duplicating validation warnings across the UI increases visual clutter and cognitive load.
 **Action:** Always apply Postel's Law by sanitizing inputs (e.g., `strip()`) before validation. Always ensure validation warnings are uniquely presented to minimize UI clutter.
+## 2024-05-24 - Do not hide validation warnings in collapsed expanders
+**Learning:** Hiding validation warnings (like API key format issues) inside collapsed components like `st.expander` causes users to miss critical feedback, especially if those validations dictate the disabled state of the primary submit button. Users get stuck wondering why the button is disabled.
+**Action:** Always render critical inline validation warnings above the primary action button, in full view. Tie the disabled state of the button directly to the exact conditions that trigger the visible warnings.
