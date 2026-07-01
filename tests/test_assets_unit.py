@@ -4,6 +4,7 @@ import requests
 
 from nlr_psm3_2_epw import assets
 from nlr_psm3_2_epw import constants
+from nlr_psm3_2_epw import epw
 
 
 class DummyResponse:
@@ -22,7 +23,7 @@ class DummyResponse:
         return self._json_data
 
 
-def _build_all_data(row_count, include_time_columns=True, bad_time=False):
+def _build_all_data(row_count, include_time_columns=True, bad_time=False, include_best_effort=True):
     columns = [
         "Local Time Zone",
         "Elevation",
@@ -47,6 +48,9 @@ def _build_all_data(row_count, include_time_columns=True, bad_time=False):
     ]
     if not include_time_columns:
         columns = [col for col in columns if col not in {"Year", "Month", "Day", "Hour", "Minute"}]
+    if not include_best_effort:
+        # Simulate the API dropping best-effort attributes on the core-only retry.
+        columns = [col for col in columns if col not in {"Cloud Type", "Precipitable Water", "Surface Albedo"}]
 
     metadata = {col: "" for col in columns}
     metadata["Local Time Zone"] = -5
@@ -58,22 +62,21 @@ def _build_all_data(row_count, include_time_columns=True, bad_time=False):
     data_rows = []
     for idx in range(row_count):
         row = {col: 0 for col in columns}
-        row.update(
-            {
-                "Temperature": 20 + idx,
-                "Dew Point": 10 + idx,
-                "Relative Humidity": 50,
-                "Pressure": 1013,
-                "GHI": 200,
-                "DNI": 500,
-                "DHI": 100,
-                "Wind Direction": 180,
-                "Wind Speed": 3,
-                "Cloud Type": 1,
-                "Precipitable Water": 1.5,
-                "Surface Albedo": 0.2,
-            }
-        )
+        values = {
+            "Temperature": 20 + idx,
+            "Dew Point": 10 + idx,
+            "Relative Humidity": 50,
+            "Pressure": 1013,
+            "GHI": 200,
+            "DNI": 500,
+            "DHI": 100,
+            "Wind Direction": 180,
+            "Wind Speed": 3,
+            "Cloud Type": 1,
+            "Precipitable Water": 1.5,
+            "Surface Albedo": 0.2,
+        }
+        row.update({k: v for k, v in values.items() if k in columns})
         if include_time_columns:
             if bad_time and idx == 0:
                 row.update({"Year": "bad", "Month": "bad", "Day": "bad", "Hour": "bad", "Minute": "bad"})
@@ -346,3 +349,55 @@ def test_download_epw_sanitizes_bad_lat_lon(monkeypatch, tmp_path):
     # Filename should use "bad-lat" and "bad-lon" strings directly, and sanitize location
     current_year = assets.datetime.now().year
     assert (tmp_path / f"Loc_w__Spaces_bad-lat_bad-lon_2012_{current_year}.epw").exists()
+
+
+def test_download_epw_retries_without_best_effort_attributes(monkeypatch, tmp_path):
+    # First request (full attribute set) fails like a location where a best-effort
+    # attribute is unavailable (400 "Data processing failure"); the retry with the
+    # core-only set succeeds, and the dropped columns are filled with EPW sentinels.
+    core_only_data = _build_all_data(3, include_time_columns=True, include_best_effort=False)
+
+    attempts = []
+
+    def _fake_request(_method, _url, params=None, **_kwargs):
+        attempts.append(params["attributes"])
+        if len(attempts) == 1:
+            return DummyResponse(
+                ok=False,
+                url="https://example.com/data?api_key=secret",
+                status_code=400,
+                json_data={"errors": ["Data processing failure."]},
+            )
+        return DummyResponse(ok=True, url="https://example.com/data")
+
+    monkeypatch.setattr(assets._session, "request", _fake_request)
+    monkeypatch.setattr(assets.pd, "read_csv", _mock_read_csv(core_only_data))
+    monkeypatch.chdir(tmp_path)
+
+    attributes = (
+        "air_temperature,cloud_type,surface_albedo,total_precipitable_water,ghi,dni,dhi,"
+        "dew_point,relative_humidity,surface_pressure,wind_direction,wind_speed"
+    )
+    assets.download_epw(
+        0, 0, "tmy", "Loc", attributes, "60", "false", "Name", "key", "reason", "aff", "email", "false", "false"
+    )
+
+    # Two attempts: full set, then core-only (best-effort attributes dropped).
+    assert len(attempts) == 2
+    assert "cloud_type" in attempts[0]
+    assert "cloud_type" not in attempts[1]
+    assert "surface_albedo" not in attempts[1]
+
+    epw_files = list(tmp_path.glob("*.epw"))
+    assert len(epw_files) == 1
+
+    # Restore the real pd.read_csv (patched above at module level) so the EPW
+    # read-back parses the written file instead of the mocked reader.
+    monkeypatch.undo()
+    data = epw.EPW()
+    data.read(epw_files[0])
+    # Dropped best-effort columns are filled with EPW "missing" sentinels.
+    assert (data.dataframe["Total Sky Cover"] == 99).all()
+    assert (data.dataframe["Opaque Sky Cover"] == 99).all()
+    assert (data.dataframe["Precipitable Water"] == 999).all()
+    assert (data.dataframe["Albedo"] == 999).all()

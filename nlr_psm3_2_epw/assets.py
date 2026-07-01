@@ -12,6 +12,29 @@ from .constants import GOES_AGGREGATED_URL, GOES_TMY_URL, DEFAULT_HEADERS
 # Bolt Optimization: Maintain a global session to reuse TCP connections
 _session = requests.Session()
 
+# Attributes that are not available at every location for the NLR TMY product.
+# Requesting them at a point where they have no data makes the API return
+# 400 "Data processing failure" (the clearsky / QA fields are also unused by the
+# EPW writer). download_epw retries without these and fills the affected EPW
+# columns with the standard "missing" sentinels.
+BEST_EFFORT_ATTRIBUTES = frozenset(
+    {
+        "cloud_type",
+        "surface_albedo",
+        "total_precipitable_water",
+        "clearsky_dhi",
+        "clearsky_dni",
+        "clearsky_ghi",
+        "fill_flag",
+        "solar_zenith_angle",
+    }
+)
+
+
+def _column_or(df: pd.DataFrame, name: str, missing: Any):
+    """Return a DataFrame column's values if present, else an EPW missing sentinel."""
+    return df[name].values if name in df.columns else missing
+
 
 def _sanitize_url(raw_url: str) -> str:
     """Removes the api_key from a URL for safe logging."""
@@ -67,6 +90,16 @@ def download_epw(
 
     url = GOES_TMY_URL if is_tmy else GOES_AGGREGATED_URL
 
+    # Attribute fallback chain: request everything first, then retry with only the
+    # core solar+meteorological attributes that exist at every location. This
+    # avoids the API's 400 "Data processing failure" when a best-effort attribute
+    # (cloud_type / surface_albedo / ...) has no data at the requested point.
+    requested_attrs = [a.strip() for a in str(attributes).split(",") if a.strip()]
+    core_attrs = [a for a in requested_attrs if a not in BEST_EFFORT_ATTRIBUTES]
+    attribute_attempts = [",".join(requested_attrs)]
+    if core_attrs and core_attrs != requested_attrs:
+        attribute_attempts.append(",".join(core_attrs))
+
     payload = {
         "names": year,
         "leap_day": leap_year,
@@ -87,7 +120,12 @@ def download_epw(
     try:
         # Bolt Optimization: Use the session object to reuse the underlying TCP/TLS connection.
         # This speeds up repeated requests to the NLR API by avoiding repeated handshakes.
-        r = _session.request("GET", url, params=payload, headers=headers, timeout=20)
+        for attempt_attributes in attribute_attempts:
+            payload["attributes"] = attempt_attributes
+            r = _session.request("GET", url, params=payload, headers=headers, timeout=20)
+            if r.ok:
+                break
+
         # Redact API key for safety before potentially logging payload/url in an error
         payload["api_key"] = "REDACTED"
 
@@ -177,6 +215,13 @@ def download_epw(
         str(elevation),
     ]
 
+    # Best-effort columns: if the API dropped them (attribute unavailable at this
+    # location, so we fell back to the core set), fill with EPW "missing" sentinels
+    # rather than raising a KeyError.
+    cloud_cover = _column_or(df, "Cloud Type", 99)
+    precipitable_water = _column_or(df, "Precipitable Water", 999)
+    surface_albedo = _column_or(df, "Surface Albedo", 999)
+
     # Bolt Optimization:
     # Avoid pandas `.to_numpy()` and pandas `.multiply()` overhead during DataFrame construction.
     # Using underlying numpy `.values` directly, computing operations on the numpy arrays,
@@ -207,17 +252,17 @@ def download_epw(
             "Zenith Luminance": 9999,
             "Wind Direction": df["Wind Direction"].values,
             "Wind Speed": df["Wind Speed"].values,
-            "Total Sky Cover": df["Cloud Type"].values,
-            "Opaque Sky Cover": df["Cloud Type"].values,
+            "Total Sky Cover": cloud_cover,
+            "Opaque Sky Cover": cloud_cover,
             "Visibility": 9999,
             "Ceiling Height": 99999,
             "Present Weather Observation": "",
             "Present Weather Codes": "",
-            "Precipitable Water": df["Precipitable Water"].values,
+            "Precipitable Water": precipitable_water,
             "Aerosol Optical Depth": 0.999,
             "Snow Depth": 999,
             "Days Since Last Snowfall": 99,
-            "Albedo": df["Surface Albedo"].values,
+            "Albedo": surface_albedo,
             "Liquid Precipitation Depth": 999,
             "Liquid Precipitation Quantity": 99,
         },

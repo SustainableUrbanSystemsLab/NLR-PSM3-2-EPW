@@ -7,13 +7,20 @@ from nlr_psm3_2_epw import epw
 from nlr_psm3_2_epw.assets import download_epw
 
 
-def test_download_epw(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "lat,lon,location",
+    [
+        (40.755840, -73.982684, "NYC"),
+        # Sparse-attribute land point that used to return 400 "Data processing
+        # failure" for the full attribute set — exercises the core-only fallback.
+        (45.935870621190546, -112.994384765625, "Montana"),
+    ],
+)
+def test_download_epw(tmp_path, monkeypatch, lat, lon, location):
     api_key = os.environ.get("APIKEY")
     if not api_key:
         pytest.skip("APIKEY not set")
 
-    lat, lon = 40.755840, -73.982684
-    location = "NYC"
     year = "tmy"
     attributes = (
         "air_temperature,clearsky_dhi,clearsky_dni,clearsky_ghi,cloud_type,dew_point,dhi,dni,fill_flag,ghi,"
@@ -69,7 +76,13 @@ def test_download_epw(tmp_path, monkeypatch):
     assert (data.dataframe["Global Horizontal Radiation"] >= 0).all()
     assert (data.dataframe["Direct Normal Radiation"] >= 0).all()
     assert (data.dataframe["Diffuse Horizontal Radiation"] >= 0).all()
-    assert ((data.dataframe["Wind Direction"] >= 0) & (data.dataframe["Relative Humidity"] <= 360)).all()
+    assert ((data.dataframe["Wind Direction"] >= 0) & (data.dataframe["Wind Direction"] <= 360)).all()
     assert ((data.dataframe["Wind Speed"] >= 0) & (data.dataframe["Wind Speed"] <= 40)).all()
-    assert ((data.dataframe["Opaque Sky Cover"] >= 0) & (data.dataframe["Opaque Sky Cover"] <= 10)).all()
-    assert ((data.dataframe["Total Sky Cover"] >= 0) & (data.dataframe["Total Sky Cover"] <= 10)).all()
+
+    # Sky cover is 0-10 where available, or the EPW "missing" sentinel (99) at
+    # locations where cloud_type was dropped by the core-only fallback.
+    def _sky_ok(series):
+        return (((series >= 0) & (series <= 10)) | (series == 99)).all()
+
+    assert _sky_ok(data.dataframe["Opaque Sky Cover"])
+    assert _sky_ok(data.dataframe["Total Sky Cover"])
