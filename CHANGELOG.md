@@ -1,6 +1,39 @@
 # CHANGELOG
 
 
+## v0.5.2 (2026-07-01)
+
+### Other
+
+- Merge pull request #94 from SustainableUrbanSystemsLab/fix/tmy-attribute-fallback
+  ([`9aba2bb`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/9aba2bb98ce12f022bbb9d162eb938380e174221))
+
+🐛 fix: fall back to core attributes when NLR TMY rejects the full set
+
+### 🐛
+
+- 🐛 fix: fall back to core attributes when NLR TMY rejects the full set
+  ([`5542b20`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/5542b20dad4d232ccb787128c6ea0839af9e219f))
+
+The app requests 17 attributes for a TMY download. NLR returns 400 "Data processing failure" when a
+  requested attribute has no data at the chosen point — e.g. cloud_type / surface_albedo /
+  total_precipitable_water are unavailable at some land locations. NYC has them (so CI passed); the
+  Montana point in the reported failure does not (so the app failed).
+
+download_epw now: - requests the full attribute set first, then retries with only the core
+  solar+meteorological attributes that exist everywhere, and - fills the dropped EPW columns
+  (Total/Opaque Sky Cover, Precipitable Water, Albedo) with the standard EPW "missing" sentinels (99
+  / 999).
+
+Tests: - unit: mocked retry — first request 400, core-only retry succeeds, dropped columns written
+  as sentinels (100% coverage kept). - integration: test_download parametrized over NYC (complete)
+  and the Montana point that used to 400. This runs in CI with the real APIKEY secret, so this class
+  of location-dependent failure is now caught. Also fixed a copy-paste bug (wind-direction bound
+  checked Relative Humidity) and relaxed the sky-cover assertion to accept the sentinel.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+
+
 ## v0.5.1 (2026-07-01)
 
 ### Other

@@ -1,6 +1,6 @@
 [project]
 name = "nlr-psm3-2-epw"
-version = "0.5.1"
+version = "0.5.2"
 description = "A script that writes out epw files from NLR Physical Solar Model (PSM) v3.2.2"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -20,6 +20,7 @@ dev = [
   "pytest-cov==5.0.0",
   "ruff>=0.1.0",
 ]
+
 
 
 [tool.pytest.ini_options]
@@ -68,6 +69,7 @@ patch_tags = [
 
 [tool.semantic_release.branches.main]
 match = "(main|master)"
+
 
 [build-system]
 requires = ["setuptools>=61.0"]
