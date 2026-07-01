@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from datetime import datetime
@@ -6,6 +7,7 @@ from typing import Optional
 
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 import folium
 from streamlit_folium import st_folium
 
@@ -19,6 +21,19 @@ from nlr_psm3_2_epw.validation import (
     is_api_key_verified,
     normalize_api_key,
 )
+
+# --- SEO METADATA ---
+SEO_TITLE = "PSM3 to EPW Converter — NREL / NSRDB EnergyPlus Weather Files"
+SEO_DESCRIPTION = (
+    "Free web app to convert NREL PSM v3/v4 (NSRDB) solar climate data into EnergyPlus "
+    "Weather (EPW) files for building energy simulation. Pick a location by latitude/"
+    "longitude and download a TMY or single-year EPW file."
+)
+SEO_KEYWORDS = (
+    "EPW, EnergyPlus Weather, PSM3, PSM v4, NSRDB, NREL, TMY, typical meteorological year, "
+    "solar radiation, GHI, DNI, DHI, building energy simulation, weather file converter, climate data"
+)
+SEO_URL = "https://nrel-psm3-2-epw.streamlit.app/"
 
 # --- CONSTANTS ---
 ATTRIBUTES = (
@@ -137,8 +152,77 @@ def get_map():
     return m
 
 
+def _inject_seo_meta() -> None:
+    """Inject SEO meta tags (description, keywords, Open Graph, Twitter, canonical)
+    into the host page's <head>.
+
+    Streamlit renders the app inside a host page whose <head> is otherwise generic.
+    This runs a tiny hidden component whose script writes the tags into the parent
+    document so JavaScript-capable crawlers (e.g. Googlebot) can index them.
+    """
+    meta = {
+        "title": SEO_TITLE,
+        "url": SEO_URL,
+        "named": {
+            "description": SEO_DESCRIPTION,
+            "keywords": SEO_KEYWORDS,
+            "robots": "index, follow",
+            "twitter:card": "summary",
+            "twitter:title": SEO_TITLE,
+            "twitter:description": SEO_DESCRIPTION,
+        },
+        "property": {
+            "og:type": "website",
+            "og:title": SEO_TITLE,
+            "og:description": SEO_DESCRIPTION,
+            "og:url": SEO_URL,
+        },
+    }
+    components.html(
+        """
+        <script>
+        (function () {
+            try {
+                var data = %s;
+                var doc = window.parent.document;
+                if (!doc || !doc.head) return;
+                doc.title = data.title;
+                function upsert(selector, attr, key, content) {
+                    var el = doc.head.querySelector(selector);
+                    if (!el) {
+                        el = doc.createElement("meta");
+                        el.setAttribute(attr, key);
+                        doc.head.appendChild(el);
+                    }
+                    el.setAttribute("content", content);
+                }
+                Object.keys(data.named).forEach(function (k) {
+                    upsert('meta[name="' + k + '"]', "name", k, data.named[k]);
+                });
+                Object.keys(data.property).forEach(function (k) {
+                    upsert('meta[property="' + k + '"]', "property", k, data.property[k]);
+                });
+                var canon = doc.head.querySelector('link[rel="canonical"]');
+                if (!canon) {
+                    canon = doc.createElement("link");
+                    canon.setAttribute("rel", "canonical");
+                    doc.head.appendChild(canon);
+                }
+                canon.setAttribute("href", data.url);
+            } catch (e) {
+                /* cross-origin or unavailable head: ignore */
+            }
+        })();
+        </script>
+        """
+        % json.dumps(meta),
+        height=0,
+    )
+
+
 def main():
-    st.set_page_config(page_title="NLR to EPW", page_icon="☀️")
+    st.set_page_config(page_title=SEO_TITLE, page_icon="☀️")
+    _inject_seo_meta()
     st.title("NLR-PSM3-2-EPW")
     st.caption(f"**Version {__version__}**")
     st.markdown("This script converts climate data from NLR to the EnergyPlus Weather (EPW) format.")
