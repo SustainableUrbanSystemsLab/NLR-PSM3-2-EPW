@@ -1,6 +1,32 @@
 # CHANGELOG
 
 
+## v0.5.3 (2026-07-01)
+
+### Other
+
+- Merge pull request #95 from SustainableUrbanSystemsLab/chore/seo
+  ([`37c1a28`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/37c1a28d6108947c906b216bf8da8c31d3a3ee63))
+
+📝 docs: SEO for README + app meta tags
+
+### 📝
+
+- 📝 docs: add SEO to README and inject page meta tags in the app
+  ([`164e7d7`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/164e7d79d3fc6cb5f89d8a7ddcdc661f3e7e9d36))
+
+README is rewritten for discoverability: keyword-rich H1/intro (EPW, EnergyPlus Weather, PSM3/PSM
+  v4, NSRDB, NREL, TMY, GHI/DNI/DHI, building energy simulation), a "What is an EPW file?" section,
+  a keywords block, and a dynamic release badge (the old one was pinned to a stale v4.0.0).
+
+The Streamlit app now sets a keyword-rich page title and injects meta tags — description, keywords,
+  Open Graph, Twitter card and a canonical link — into the host page <head> via a hidden component,
+  so JS-capable crawlers can index the app. Verified at runtime (title/description/
+  og:*/twitter/canonical all present).
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+
+
 ## v0.5.2 (2026-07-01)
 
 ### Other
