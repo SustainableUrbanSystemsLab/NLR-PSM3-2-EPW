@@ -413,21 +413,22 @@ def main():
 
     # A verified default key is usable regardless of length; any other key must
     # be exactly API_KEY_LENGTH characters (whitespace already trimmed on load).
-    api_key_is_valid = is_api_key_valid(
-        api_key, is_verified=(api_key_source == "default" and default_key_verified)
-    )
+    api_key_is_valid = is_api_key_valid(api_key, is_verified=(api_key_source == "default" and default_key_verified))
 
     # Full-width validation warnings below inputs
     if not location_is_valid:
         st.warning("A location name is required to generate the file.", icon="⚠️")
 
     if not year_is_valid:
-        st.warning(year_warning, icon="⚠️")
+        if year_str:
+            st.error(year_warning, icon="🛑")
+        else:
+            st.warning(year_warning, icon="⚠️")
 
     if not api_key:
         st.warning("Please provide an API key in the 'API Key Configuration' section to request data.", icon="🔑")
     elif not api_key_is_valid:
-        st.warning("The provided API key must be exactly 40 characters long to request data.", icon="⚠️")
+        st.error("The provided API key must be exactly 40 characters long to request data.", icon="🛑")
 
     if st.button(
         "Request from NLR",

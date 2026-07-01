@@ -118,3 +118,7 @@
 ## 2024-05-24 - Symmetrical Inline Guidance for Multi-Column Layouts
 **Learning:** When arranging form inputs in multi-column layouts (like `st.columns`), providing inline instructions (`st.caption`) for one field but not the adjacent field not only deprives the user of context but creates an unbalanced visual hierarchy.
 **Action:** Ensure symmetrical levels of inline guidance in multi-column layouts. If one column requires extensive explanation, provide at least a brief, helpful instruction for the adjacent column to maintain layout balance and improve overall form accessibility.
+
+## 2024-07-01 - Distinguish Empty States from Invalid Inputs
+**Learning:** In Streamlit applications, visually distinguish between preliminary empty states and actively invalid user input to improve form accessibility. Using a generic `st.warning` for both missing inputs and explicitly incorrect inputs (e.g., malformed API keys) can confuse users about the severity of their error.
+**Action:** Use a softer `st.warning` with helpful icons (e.g., '⚠️') for missing preliminary inputs, but upgrade to `st.error` with appropriate icons (e.g., '🛑') when inputs are explicitly provided but actively invalid (e.g., malformed API keys or out-of-bounds years).
