@@ -1,6 +1,26 @@
 # CHANGELOG
 
 
+## v0.5.4 (2026-07-01)
+
+### Other
+
+- Merge pull request #96 from SustainableUrbanSystemsLab/palette-validation-ux-9508518222143056358
+  ([`e9327ce`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/e9327ce840ee3c20dbbc02a8cf2f8ae72eebc217))
+
+🎨 Palette: [validation] distinguish empty state from active invalid input errors
+
+### 🎨
+
+- 🎨 Palette: [validation] distinguish empty state from active invalid input errors
+  ([`11c42f1`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/11c42f19a35a33910ba12a29fcefecac066be8c4))
+
+- Upgraded actively invalid input validation messages from st.warning to st.error. - Retained
+  st.warning for preliminary empty states.
+
+Co-authored-by: kastnerp <1919773+kastnerp@users.noreply.github.com>
+
+
 ## v0.5.3 (2026-07-01)
 
 ### Other
