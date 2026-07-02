@@ -1,6 +1,27 @@
 # CHANGELOG
 
 
+## v0.5.5 (2026-07-02)
+
+### Other
+
+- Merge pull request #97 from SustainableUrbanSystemsLab/palette/ux-improvements-5869673819256754964
+  ([`160e9d6`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/160e9d6eaa80db8c257225db1045b1d197b5c65f))
+
+🎨 Palette: [UX Improvement] Humanize copy and enhance validation feedback
+
+### 🎨
+
+- 🎨 Palette: [UX Improvement] Humanize copy and enhance validation feedback
+  ([`ee2e7b6`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/ee2e7b6fc91316c741b132f04f42c406fc9c45d3))
+
+- Updated the page title and description to be more welcoming and explanatory. - Enhanced the API
+  key validation error to include the current character count for easier debugging. - Added dynamic
+  contextual information to the data request loading spinner to reassure users.
+
+Co-authored-by: kastnerp <1919773+kastnerp@users.noreply.github.com>
+
+
 ## v0.5.4 (2026-07-01)
 
 ### Other
