@@ -223,9 +223,9 @@ def _inject_seo_meta() -> None:
 def main():
     st.set_page_config(page_title=SEO_TITLE, page_icon="☀️")
     _inject_seo_meta()
-    st.title("NLR-PSM3-2-EPW")
+    st.title("NLR Climate to EPW Converter")
     st.caption(f"**Version {__version__}**")
-    st.markdown("This script converts climate data from NLR to the EnergyPlus Weather (EPW) format.")
+    st.markdown("Easily convert physical solar model data from NLR into the EnergyPlus Weather (EPW) format for building energy simulation.")
 
     # API Key Handling
     default_api_key = _load_api_key()
@@ -428,7 +428,7 @@ def main():
     if not api_key:
         st.warning("Please provide an API key in the 'API Key Configuration' section to request data.", icon="🔑")
     elif not api_key_is_valid:
-        st.error("The provided API key must be exactly 40 characters long to request data.", icon="🛑")
+        st.error(f"The provided API key must be exactly 40 characters long to request data. (Currently {len(api_key)} characters)", icon="🛑")
 
     if st.button(
         "Request from NLR",
@@ -437,7 +437,7 @@ def main():
         icon=":material/cloud_download:",
         use_container_width=True,
     ):
-        with st.spinner("Requesting data from NLR..."):
+        with st.spinner(f"Requesting '{year}' data for '{location}' from NLR..."):
             try:
                 file_name = download_epw(
                     lon,

@@ -122,3 +122,7 @@
 ## 2024-07-01 - Distinguish Empty States from Invalid Inputs
 **Learning:** In Streamlit applications, visually distinguish between preliminary empty states and actively invalid user input to improve form accessibility. Using a generic `st.warning` for both missing inputs and explicitly incorrect inputs (e.g., malformed API keys) can confuse users about the severity of their error.
 **Action:** Use a softer `st.warning` with helpful icons (e.g., '⚠️') for missing preliminary inputs, but upgrade to `st.error` with appropriate icons (e.g., '🛑') when inputs are explicitly provided but actively invalid (e.g., malformed API keys or out-of-bounds years).
+
+## 2024-07-03 - Contextual Error and Loading States
+**Learning:** Generic error messages (like "must be 40 characters") and loading states (like "Loading...") offer poor user feedback. When an input is invalid, telling the user *why* their specific input is wrong (e.g., showing the actual character count) helps them debug instantly. During long asynchronous requests, showing *what* is being requested (e.g., "Requesting 2020 data for Atlanta...") reassures the user that their specific inputs were captured correctly.
+**Action:** Always inject dynamic, contextual information into validation errors (like character counts or invalid values) and loading spinners to provide immediate, relevant feedback to the user.
