@@ -225,7 +225,9 @@ def main():
     _inject_seo_meta()
     st.title("NLR Climate to EPW Converter")
     st.caption(f"**Version {__version__}**")
-    st.markdown("Easily convert physical solar model data from NLR into the EnergyPlus Weather (EPW) format for building energy simulation.")
+    st.markdown(
+        "Easily convert physical solar model data from NLR into the EnergyPlus Weather (EPW) format for building energy simulation."
+    )
 
     # API Key Handling
     default_api_key = _load_api_key()
@@ -259,6 +261,7 @@ def main():
             type="password",
             max_chars=40,
             placeholder="Enter your 40-character API key",
+            icon=":material/key:",
         )
         st.caption(help_text)
 
@@ -346,6 +349,7 @@ def main():
             format="%.4f",
             step=0.0001,
             placeholder="33.7700",
+            icon=":material/my_location:",
         )
         st.caption("Latitude of the location in decimal degrees (e.g., 33.770)")
     with col2:
@@ -357,6 +361,7 @@ def main():
             format="%.4f",
             step=0.0001,
             placeholder="-84.3824",
+            icon=":material/explore:",
         )
         st.caption("Longitude of the location in decimal degrees (e.g., -84.3824)")
 
@@ -367,6 +372,7 @@ def main():
             value=default_location,
             placeholder="e.g., Atlanta",
             max_chars=60,
+            icon=":material/location_city:",
         )
         st.caption("A descriptive name for the location, used to generate the output filename.")
         st.caption("💡 *Auto-updates when you select a new location on the map.*")
@@ -377,6 +383,7 @@ def main():
             value="tmy",
             placeholder="e.g., 2012, tmy, tmy-2024",
             max_chars=15,
+            icon=":material/calendar_month:",
         )
         st.caption("A specific year (>=1998) or a TMY identifier like 'tmy' or 'tmy-2024'")
         st.caption("💡 *TMY (Typical Meteorological Year) datasets represent long-term average climate conditions.*")
@@ -428,7 +435,10 @@ def main():
     if not api_key:
         st.warning("Please provide an API key in the 'API Key Configuration' section to request data.", icon="🔑")
     elif not api_key_is_valid:
-        st.error(f"The provided API key must be exactly 40 characters long to request data. (Currently {len(api_key)} characters)", icon="🛑")
+        st.error(
+            f"The provided API key must be exactly 40 characters long to request data. (Currently {len(api_key)} characters)",
+            icon="🛑",
+        )
 
     if st.button(
         "Request from NLR",

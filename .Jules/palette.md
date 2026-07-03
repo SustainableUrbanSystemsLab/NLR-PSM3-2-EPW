@@ -1,0 +1,3 @@
+## 2024-05-24 - Visual Polish via Material Icons on Streamlit Inputs
+**Learning:** Adding contextual visual anchors (`icon=":material/...:"`) directly inside `st.text_input` and `st.number_input` (supported in recent Streamlit versions like >=1.54) significantly improves form scanability and reduces cognitive load by bridging textual labels with immediate visual cognition.
+**Action:** Always verify if a semantic icon can be mapped to a core input field (e.g. `:material/key:` for API keys, `:material/explore:` for coordinates) to add low-effort, high-impact UX polish before declaring a UI finalized.
