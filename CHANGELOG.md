@@ -1,6 +1,23 @@
 # CHANGELOG
 
 
+## v0.5.6 (2026-07-04)
+
+### Other
+
+- Merge pull request #98 from SustainableUrbanSystemsLab/palette-input-icons-8823214741258114208
+  ([`f0e390a`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/f0e390a04691f004612891a9edcb7e00791fa4c9))
+
+🎨 Palette: Add Material Icons to Inputs
+
+### 🎨
+
+- 🎨 Palette: Add Material Icons to Inputs
+  ([`53a59cf`](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/commit/53a59cfde0617cc30195174408d6f67949b9bc0b))
+
+Co-authored-by: kastnerp <1919773+kastnerp@users.noreply.github.com>
+
+
 ## v0.5.5 (2026-07-02)
 
 ### Other
