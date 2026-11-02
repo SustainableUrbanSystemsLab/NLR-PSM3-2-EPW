@@ -100,40 +100,47 @@ def _load_api_key() -> Optional[str]:
     return None
 
 
-@st.cache_data(show_spinner="📍 Reverse geocoding...")
 def get_location_name(lat: float, lon: float) -> str:
+    """Returns the reverse-geocoded name or 'Unknown Location'; failures are not cached."""
+    try:
+        return _reverse_geocode(round(lat, 4), round(lon, 4))
+    except Exception as e:
+        print(f"Error in reverse geocoding: {e}")
+        return "Unknown Location"
+
+
+@st.cache_data(show_spinner="📍 Reverse geocoding...")
+def _reverse_geocode(lat: float, lon: float) -> str:
     """
-    Reverse geocodes the given latitude and longitude using OpenStreetMap Nominatim API.
-    Returns a meaningful location name or 'Unknown Location' if it fails.
+    Reverse geocodes via OpenStreetMap Nominatim. Raises on request failure (so st.cache_data skips it)
+    and returns 'Unknown Location' only when the response has no usable name.
     """
     url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}"
     headers = {"User-Agent": f"NLR-PSM-2-EPW-App/{__version__}"}
-    try:
-        response = requests.get(url, headers=headers, timeout=5)
-        response.raise_for_status()
-        data = response.json()
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
+    data = response.json()
 
-        if "address" in data:
-            addr = data["address"]
-            city = (
-                addr.get("city") or addr.get("town") or addr.get("village") or addr.get("hamlet") or addr.get("county")
-            )
-            state = addr.get("state")
-            country = addr.get("country")
+    if "address" in data:
+        addr = data["address"]
+        city = (
+            addr.get("city")
+            or addr.get("town")
+            or addr.get("village")
+            or addr.get("hamlet")
+            or addr.get("municipality")
+            or addr.get("county")
+        )
+        parts = [p for p in (city, addr.get("state"), addr.get("country")) if p]
+        if parts:
+            return ", ".join(parts)
 
-            parts = [p for p in (city, state, country) if p]
-            if parts:
-                return ", ".join(parts)
-
-        if "display_name" in data:
-            # Fallback to the first few parts of the display name
-            parts = data["display_name"].split(", ")
-            if len(parts) > 3:
-                return ", ".join(parts[:3])
-            return data["display_name"]
-
-    except Exception as e:
-        print(f"Error in reverse geocoding: {e}")
+    if "display_name" in data:
+        # Fallback to the first few parts of the display name
+        parts = data["display_name"].split(", ")
+        if len(parts) > 3:
+            return ", ".join(parts[:3])
+        return data["display_name"]
 
     return "Unknown Location"
 
@@ -294,7 +301,11 @@ def main():
     st.header("Location & Time Details", divider="gray")
 
     # Show a map to pick lat/lon
-    st.info("**Tip:** Select a location on the map, or enter coordinates manually in the fields provided.", icon="🗺️")
+    st.info(
+        "**Tip:** Select a location on the map, or enter coordinates manually in the fields provided. "
+        "NLR GOES data only covers the Americas (60°S–60°N, 180°W–20°W).",
+        icon="🗺️",
+    )
     m = get_map()
 
     # Initialize session state for lat/lon if they don't exist
@@ -541,7 +552,8 @@ def main():
                 "**Visualize your EPW file**\n\n"
                 "Once downloaded, you can visualize your EPW file using these free online tools:\n\n"
                 "- **[EPWvis](https://mdahlhausen.github.io/epwvis/)**: View summary charts and graphs for temperature, radiation, and wind.\n"
-                "- **[CBE Clima Tool](https://clima.cbe.berkeley.edu/)**: Advanced interactive climate analysis and psychrometric charts.",
+                "- **[CBE Clima Tool](https://clima.cbe.berkeley.edu/)**: Advanced interactive climate analysis and psychrometric charts.\n"
+                "- **[Eddy3D](https://www.eddy3d.com/)** (recommended): Free Grasshopper plugin for climate analysis and microclimate/wind simulation that loads EPW files directly.",
                 icon="📊",
             )
         else:
