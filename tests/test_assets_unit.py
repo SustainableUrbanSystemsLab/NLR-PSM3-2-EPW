@@ -2,8 +2,8 @@ import pandas as pd
 import pytest
 import requests
 
-from nlr_psm3_2_epw import assets
-from nlr_psm3_2_epw import constants
+from nlr_psm_2_epw import assets
+from nlr_psm_2_epw import constants
 
 
 class DummyResponse:
@@ -106,7 +106,7 @@ def test_sanitize_url_removes_api_key():
 
 def test_nsrdb_urls_use_new_developer_host():
     assert constants.DEVELOPER_BASE_URL == "https://developer.nlr.gov"
-    assert constants.DEVELOPER_DOCS_URL == "https://developer.nlr.gov"
+    assert constants.DEVELOPER_DOCS_URL.startswith("https://developer.nlr.gov/docs/")
     assert constants.DEVELOPER_SIGNUP_URL == "https://developer.nlr.gov/signup"
     assert constants.GOES_AGGREGATED_URL.startswith(constants.DEVELOPER_BASE_URL)
     assert constants.GOES_TMY_URL.startswith(constants.DEVELOPER_BASE_URL)

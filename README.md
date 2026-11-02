@@ -1,11 +1,11 @@
-# NLR-PSM3-2-EPW
-[![Build-Test](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/actions/workflows/build-test.yml)
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://nrel-psm3-2-epw.streamlit.app/)
-[![Version](https://img.shields.io/badge/version-v4.0.0-blue)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/releases)
+# NLR PSM to EPW
+[![Build-Test](https://github.com/SustainableUrbanSystemsLab/NLR-PSM-2-EPW/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM-2-EPW/actions/workflows/build-test.yml)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://nlr-psm-2-epw.streamlit.app/)
+[![Version](https://img.shields.io/badge/version-v4.0.0-blue)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM-2-EPW/releases)
 
 
 
-A script and Streamlit app that writes out EPW files from NLR Physical Solar Model (PSM) v3.2.2 (and v4.0.0 API).
+A script and Streamlit app that writes out EPW files from NLR Physical Solar Model (PSM) via the NLR GOES Aggregated API.
 
 ## Features
 
@@ -19,7 +19,7 @@ A script and Streamlit app that writes out EPW files from NLR Physical Solar Mod
 -   `app/`: Contains the Streamlit application code.
     -   `streamlit_app.py`: Main entry point.
     -   `.streamlit/secrets.toml`: (Not committed) Stores your API key.
--   `nlr_psm3_2_epw/`: Core transformation logic.
+-   `nlr_psm_2_epw/`: Core transformation logic.
 -   `tests/`: Unit tests (100% coverage).
 
 ## How to Run Locally
@@ -57,4 +57,4 @@ A script and Streamlit app that writes out EPW files from NLR Physical Solar Mod
 
 ## Demo
 
--   [Link to demo](https://nrel-psm3-2-epw.streamlit.app/)
+-   [Link to demo](https://nlr-psm-2-epw.streamlit.app/)

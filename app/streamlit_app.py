@@ -10,10 +10,10 @@ import streamlit as st
 import folium
 from streamlit_folium import st_folium
 
-__version__ = version("nlr-psm3-2-epw")
+__version__ = version("nlr-psm-2-epw")
 
-from nlr_psm3_2_epw.assets import download_epw
-from nlr_psm3_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL
+from nlr_psm_2_epw.assets import download_epw
+from nlr_psm_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL, MAX_YEAR, MIN_YEAR
 
 # --- CONSTANTS ---
 ATTRIBUTES = (
@@ -29,7 +29,6 @@ YOUR_AFFILIATION = "aaa"
 YOUR_EMAIL = "Joe@Doe.edu"
 MAILING_LIST = "false"
 LEAP_YEAR = "false"
-MIN_YEAR = 1998
 VALID_API_KEY_HASH = "1c2c12cf359f7aba48e0aaf39ac031d98fee2418f3c4e482ec1044904032fefe"
 
 
@@ -88,7 +87,7 @@ def get_location_name(lat: float, lon: float) -> str:
     Returns a meaningful location name or 'Unknown Location' if it fails.
     """
     url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}"
-    headers = {"User-Agent": f"NLR-PSM3-2-EPW-App/{__version__}"}
+    headers = {"User-Agent": f"NLR-PSM-2-EPW-App/{__version__}"}
     try:
         response = requests.get(url, headers=headers, timeout=5)
         response.raise_for_status()
@@ -133,10 +132,10 @@ def get_map():
 
 
 def main():
-    st.set_page_config(page_title="NLR to EPW", page_icon="☀️")
-    st.title("NLR-PSM3-2-EPW")
+    st.set_page_config(page_title="NLR PSM to EPW", page_icon="☀️")
+    st.title("NLR PSM to EPW")
     st.caption(f"**Version {__version__}**")
-    st.markdown("This script converts climate data from NLR to the EnergyPlus Weather (EPW) format.")
+    st.markdown("This script converts NLR PSM (GOES Aggregated / TMY) climate data to the EnergyPlus Weather (EPW) format.")
 
     # API Key Handling
     default_api_key = _load_api_key()
@@ -288,7 +287,7 @@ def main():
             placeholder="e.g., 2012, tmy, tmy-2024",
             max_chars=15,
         )
-        st.caption("A specific year (>=1998) or a TMY identifier like 'tmy' or 'tmy-2024'")
+        st.caption(f"A specific year ({MIN_YEAR}–{MAX_YEAR}) or a TMY identifier like 'tmy' or 'tmy-2024'")
         st.caption("💡 *TMY (Typical Meteorological Year) datasets represent long-term average climate conditions.*")
 
     current_year = datetime.now().year
@@ -307,12 +306,9 @@ def main():
         year_warning = "A year or TMY identifier is required."
     elif year_str.isdigit():
         year_int = int(year_str)
-        if year_int >= current_year - 1:
+        if year_int > MAX_YEAR:
             year_is_valid = False
-            year_warning = (
-                f"NLR does not provide data for the year {year}. "
-                f"Data is typically only available up to {current_year - 2}."
-            )
+            year_warning = f"NLR does not provide data for the year {year}. Latest available year is {MAX_YEAR}."
         elif year_int < MIN_YEAR:
             year_is_valid = False
             year_warning = (

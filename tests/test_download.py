@@ -3,8 +3,8 @@ from datetime import datetime
 
 import pytest
 
-from nlr_psm3_2_epw import epw
-from nlr_psm3_2_epw.assets import download_epw
+from nlr_psm_2_epw import epw
+from nlr_psm_2_epw.assets import download_epw
 
 
 def test_download_epw(tmp_path, monkeypatch):

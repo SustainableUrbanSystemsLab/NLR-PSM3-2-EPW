@@ -7,7 +7,7 @@ from typing import Union, Any
 import pandas as pd
 import requests
 from . import epw
-from .constants import GOES_AGGREGATED_URL, GOES_TMY_URL, DEFAULT_HEADERS
+from .constants import GOES_AGGREGATED_URL, GOES_TMY_URL, DEFAULT_HEADERS, MAX_YEAR
 
 # Bolt Optimization: Maintain a global session to reuse TCP connections
 _session = requests.Session()
@@ -55,12 +55,8 @@ def download_epw(
     if not is_tmy:
         if year_int is None:
             raise ValueError("Year must be numeric unless using a TMY/TGY/TDY dataset.")
-        current_year = datetime.now().year
-        if year_int in (current_year, current_year - 1):
-            raise Exception(
-                f"NLR does not provide data for the current year {year}. "
-                f"It is also unlikely that there is data availability for {year_int - 1}."
-            )
+        if year_int > MAX_YEAR:
+            raise Exception(f"NLR does not provide data for the year {year}. Latest available year is {MAX_YEAR}.")
 
     if is_tmy and str(interval) != "60":
         interval = "60"
@@ -169,7 +165,7 @@ def download_epw(
         location,
         "STATE",
         "COUNTRY",
-        "NLR PSM v4 SOURCE",
+        "NLR PSM SOURCE",
         "XXX",
         str(lat),
         str(lon),
@@ -190,7 +186,7 @@ def download_epw(
             "Day": day_vals,
             "Hour": hour_vals + 1,
             "Minute": minute_vals,
-            "Data Source and Uncertainty Flags": "'Created with NLR PSM v4 input data'",
+            "Data Source and Uncertainty Flags": "'Created with NLR PSM input data'",
             "Dry Bulb Temperature": df["Temperature"].values,
             "Dew Point Temperature": df["Dew Point"].values,
             "Relative Humidity": df["Relative Humidity"].values,
