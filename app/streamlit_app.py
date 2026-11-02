@@ -345,7 +345,9 @@ def main():
                 st.toast("NLR GOES data only covers the Americas. Pick a point inside the map area.", icon="🌍")
             click_id = prev_click_id
 
-        # If this is a new map click, update session state and rerun to sync inputs
+        # If this is a new map click, update session state; the inputs below pick it up this run.
+        # No st.rerun() here: it counts as a finished run before the inputs render, so Streamlit
+        # drops their keyed state and the location name resets to the default.
         if prev_click_id != click_id:
             st.session_state["last_map_click"] = click_id
             st.session_state.input_lat = float(click_lat)
@@ -357,8 +359,6 @@ def main():
                 st.toast(f"Location updated to **{loc_name}**", icon="📍")
             else:
                 st.toast(f"Location updated to coordinates: {click_lat:.4f}, {click_lon:.4f}", icon="📍")
-
-            st.rerun()
 
     lat = st.session_state.input_lat
     lon = st.session_state.input_lon
