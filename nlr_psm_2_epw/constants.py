@@ -9,6 +9,9 @@ MIN_YEAR = 1998
 # shortcut: assumes last full year is published; API rejects it if NLR lags, no endpoint lists years
 MAX_YEAR = datetime.now().year - 1
 
+# shortcut: approximate GOES coverage (Americas), not from NLR docs; refine against their coverage map
+GOES_BOUNDS = [[-60.0, -180.0], [60.0, -20.0]]  # [[south, west], [north, east]]
+
 GOES_AGGREGATED_URL = f"{DEVELOPER_BASE_URL}/api/nsrdb/v2/solar/nsrdb-GOES-aggregated-v4-0-0-download.csv"
 GOES_TMY_URL = f"{DEVELOPER_BASE_URL}/api/nsrdb/v2/solar/nsrdb-GOES-tmy-v4-0-0-download.csv"
 

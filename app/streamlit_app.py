@@ -13,7 +13,7 @@ from streamlit_folium import st_folium
 __version__ = version("nlr-psm-2-epw")
 
 from nlr_psm_2_epw.assets import download_epw
-from nlr_psm_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL, MAX_YEAR, MIN_YEAR
+from nlr_psm_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL, GOES_BOUNDS, MAX_YEAR, MIN_YEAR
 
 # --- CONSTANTS ---
 ATTRIBUTES = (
@@ -126,7 +126,16 @@ def get_map():
     This saves CPU time and prevents the frontend from fully destroying and
     re-rendering the map iframe during unrelated app interactions (like typing in text inputs).
     """
-    m = folium.Map(location=[33.770, -84.3824], zoom_start=4)
+    m = folium.Map(
+        location=[33.770, -84.3824],
+        zoom_start=4,
+        min_zoom=2,
+        max_bounds=True,
+        min_lat=GOES_BOUNDS[0][0],
+        max_lat=GOES_BOUNDS[1][0],
+        min_lon=GOES_BOUNDS[0][1],
+        max_lon=GOES_BOUNDS[1][1],
+    )
     m.add_child(folium.LatLngPopup())
     return m
 
