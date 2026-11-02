@@ -49,6 +49,15 @@ def _is_tmy_name(value: Any) -> bool:
     return name.startswith(("tmy", "tgy", "tdy"))
 
 
+class NLRError(RuntimeError):
+    """NLR API rejected the request; `messages` holds the API's own error strings."""
+
+    def __init__(self, message: str, status: int, messages: list):
+        super().__init__(message)
+        self.status = status
+        self.messages = messages
+
+
 def download_epw(
     lon: Union[str, float],
     lat: Union[str, float],
@@ -131,7 +140,12 @@ def download_epw(
                 error_payload = r.json()
             except ValueError:
                 error_payload = {"message": r.text.strip()}
-            raise RuntimeError(f"NLR request failed ({r.status_code}) for {safe_url}: {error_payload}")
+            errors = error_payload.get("errors") or [error_payload.get("message")] if isinstance(error_payload, dict) else []
+            raise NLRError(
+                f"NLR request failed ({r.status_code}) for {safe_url}: {error_payload}",
+                r.status_code,
+                [str(e) for e in errors if e],
+            )
 
         # Parse the downloaded content instead of requesting the URL again
         # This prevents pandas from making a second HTTP request for the same data

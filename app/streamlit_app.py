@@ -13,7 +13,7 @@ from streamlit_folium import st_folium
 
 __version__ = version("nlr-psm-2-epw")
 
-from nlr_psm_2_epw.assets import download_epw
+from nlr_psm_2_epw.assets import NLRError, download_epw
 from nlr_psm_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL, GOES_BOUNDS, MAX_YEAR, MIN_YEAR
 from nlr_psm_2_epw.validation import (
     API_KEY_LENGTH,
@@ -149,8 +149,9 @@ def get_map():
     m = folium.Map(
         location=[33.770, -84.3824],
         zoom_start=4,
-        min_zoom=2,
+        min_zoom=3,
         max_bounds=True,
+        max_bounds_viscosity=1.0,
         min_lat=GOES_BOUNDS[0][0],
         max_lat=GOES_BOUNDS[1][0],
         min_lon=GOES_BOUNDS[0][1],
@@ -324,6 +325,14 @@ def main():
 
         click_id = f"{click_lat}-{click_lon}"
         prev_click_id = st.session_state.get("last_map_click")
+        in_bounds = (
+            GOES_BOUNDS[0][0] <= click_lat <= GOES_BOUNDS[1][0] and GOES_BOUNDS[0][1] <= click_lon <= GOES_BOUNDS[1][1]
+        )
+        if not in_bounds:
+            if prev_click_id != click_id:
+                st.session_state["last_map_click"] = click_id
+                st.toast("NLR GOES data only covers the Americas. Pick a point inside the map area.", icon="🌍")
+            click_id = prev_click_id
 
         # If this is a new map click, update session state and rerun to sync inputs
         if prev_click_id != click_id:
@@ -473,7 +482,11 @@ def main():
                     LEAP_YEAR,
                 )
             except Exception as exc:
-                st.error("Request failed: The data could not be retrieved from NLR.", icon="❌")
+                nlr_msgs = exc.messages if isinstance(exc, NLRError) else []
+                st.error(
+                    "Request failed: " + ("; ".join(dict.fromkeys(nlr_msgs)) or "the data could not be retrieved from NLR."),
+                    icon="❌",
+                )
                 with st.expander("🛠️ View technical details"):
                     st.code(str(exc), language="text")
                 if "No data available at the provided location" in str(exc):
