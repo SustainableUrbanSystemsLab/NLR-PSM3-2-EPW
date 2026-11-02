@@ -1,5 +1,5 @@
+import json
 import os
-import hashlib
 import re
 from datetime import datetime
 from importlib.metadata import version
@@ -7,6 +7,7 @@ from typing import Optional
 
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 import folium
 from streamlit_folium import st_folium
 
@@ -14,6 +15,25 @@ __version__ = version("nlr-psm-2-epw")
 
 from nlr_psm_2_epw.assets import download_epw
 from nlr_psm_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL, GOES_BOUNDS, MAX_YEAR, MIN_YEAR
+from nlr_psm_2_epw.validation import (
+    API_KEY_LENGTH,
+    is_api_key_valid,
+    is_api_key_verified,
+    normalize_api_key,
+)
+
+# --- SEO METADATA ---
+SEO_TITLE = "NLR PSM to EPW Converter — NSRDB EnergyPlus Weather Files"
+SEO_DESCRIPTION = (
+    "Free web app to convert NLR PSM (NSRDB) solar climate data into EnergyPlus "
+    "Weather (EPW) files for building energy simulation. Pick a location by latitude/"
+    "longitude and download a TMY or single-year EPW file."
+)
+SEO_KEYWORDS = (
+    "EPW, EnergyPlus Weather, PSM, NSRDB, NLR, TMY, typical meteorological year, "
+    "solar radiation, GHI, DNI, DHI, building energy simulation, weather file converter, climate data"
+)
+SEO_URL = "https://nlr-psm-2-epw.streamlit.app/"
 
 # --- CONSTANTS ---
 ATTRIBUTES = (
@@ -140,11 +160,82 @@ def get_map():
     return m
 
 
+def _inject_seo_meta() -> None:
+    """Inject SEO meta tags (description, keywords, Open Graph, Twitter, canonical)
+    into the host page's <head>.
+
+    Streamlit renders the app inside a host page whose <head> is otherwise generic.
+    This runs a tiny hidden component whose script writes the tags into the parent
+    document so JavaScript-capable crawlers (e.g. Googlebot) can index them.
+    """
+    meta = {
+        "title": SEO_TITLE,
+        "url": SEO_URL,
+        "named": {
+            "description": SEO_DESCRIPTION,
+            "keywords": SEO_KEYWORDS,
+            "robots": "index, follow",
+            "twitter:card": "summary",
+            "twitter:title": SEO_TITLE,
+            "twitter:description": SEO_DESCRIPTION,
+        },
+        "property": {
+            "og:type": "website",
+            "og:title": SEO_TITLE,
+            "og:description": SEO_DESCRIPTION,
+            "og:url": SEO_URL,
+        },
+    }
+    components.html(
+        """
+        <script>
+        (function () {
+            try {
+                var data = %s;
+                var doc = window.parent.document;
+                if (!doc || !doc.head) return;
+                doc.title = data.title;
+                function upsert(selector, attr, key, content) {
+                    var el = doc.head.querySelector(selector);
+                    if (!el) {
+                        el = doc.createElement("meta");
+                        el.setAttribute(attr, key);
+                        doc.head.appendChild(el);
+                    }
+                    el.setAttribute("content", content);
+                }
+                Object.keys(data.named).forEach(function (k) {
+                    upsert('meta[name="' + k + '"]', "name", k, data.named[k]);
+                });
+                Object.keys(data.property).forEach(function (k) {
+                    upsert('meta[property="' + k + '"]', "property", k, data.property[k]);
+                });
+                var canon = doc.head.querySelector('link[rel="canonical"]');
+                if (!canon) {
+                    canon = doc.createElement("link");
+                    canon.setAttribute("rel", "canonical");
+                    doc.head.appendChild(canon);
+                }
+                canon.setAttribute("href", data.url);
+            } catch (e) {
+                /* cross-origin or unavailable head: ignore */
+            }
+        })();
+        </script>
+        """
+        % json.dumps(meta),
+        height=0,
+    )
+
+
 def main():
-    st.set_page_config(page_title="NLR PSM to EPW", page_icon="☀️")
+    st.set_page_config(page_title=SEO_TITLE, page_icon="☀️")
+    _inject_seo_meta()
     st.title("NLR PSM to EPW")
     st.caption(f"**Version {__version__}**")
-    st.markdown("This script converts NLR PSM (GOES Aggregated / TMY) climate data to the EnergyPlus Weather (EPW) format.")
+    st.markdown(
+        "Easily convert physical solar model data from NLR into the EnergyPlus Weather (EPW) format for building energy simulation."
+    )
 
     # API Key Handling
     default_api_key = _load_api_key()
@@ -160,12 +251,17 @@ def main():
     api_key = ""
     api_key_source = "none"
 
-    with st.expander("🔑 API Key Configuration", expanded=not bool(default_api_key)):
+    # Verify the default key once, up front: it drives both the auto-expand
+    # behaviour below and the request-button validity further down.
+    default_key_verified = is_api_key_verified(default_api_key, VALID_API_KEY_HASH)
+    is_default_key_unverified = bool(default_api_key) and not default_key_verified
+
+    with st.expander("🔑 API Key Configuration", expanded=not bool(default_api_key) or is_default_key_unverified):
         label = "Provide your own NLR API key (optional)" if default_api_key else "Provide your NLR API key (required)"
         help_text = (
-            "Overrides the default API key if provided."
+            f"Overrides the default API key if provided. You can [request a free NLR API key]({DEVELOPER_SIGNUP_URL}) if needed."
             if default_api_key
-            else "An NLR API key is strictly required to request data."
+            else f"An NLR API key is strictly required to request data. You can [request a free NLR API key]({DEVELOPER_SIGNUP_URL})."
         )
         api_key_override = st.text_input(
             label,
@@ -173,31 +269,26 @@ def main():
             type="password",
             max_chars=40,
             placeholder="Enter your 40-character API key",
+            icon=":material/key:",
         )
         st.caption(help_text)
 
         if api_key_override:
-            api_key = api_key_override
+            api_key = normalize_api_key(api_key_override)
             api_key_source = "user"
-            if len(api_key.strip()) != 40:
-                st.warning(
-                    "User API key loaded, but it is not 40 characters long. NLR keys are typically exactly 40 characters.",
-                    icon="⚠️",
-                )
-            else:
+            if len(api_key) == API_KEY_LENGTH:
                 st.success("User API key loaded.", icon="✅")
         elif default_api_key:
-            api_key = default_api_key
+            api_key = normalize_api_key(default_api_key)
             api_key_source = "default"
 
-            # Verify Hash
-            key_hash = hashlib.sha256(api_key.strip().encode()).hexdigest()
-            if key_hash == VALID_API_KEY_HASH:
+            if default_key_verified:
                 st.success("Default API key loaded (Verified).", icon="✅")
             else:
-                st.warning("Default API key loaded (Unverified).", icon="⚠️")
-        else:
-            st.warning("No API key loaded. Please provide one in the API Key Configuration section.", icon="⚠️")
+                st.warning(
+                    "Default API key loaded (Unverified). Please verify the key in your .streamlit/secrets.toml file.",
+                    icon="⚠️",
+                )
 
     st.header("Location & Time Details", divider="gray")
 
@@ -267,6 +358,8 @@ def main():
             key="input_lat",
             format="%.4f",
             step=0.0001,
+            placeholder="33.7700",
+            icon=":material/my_location:",
         )
         st.caption("Latitude of the location in decimal degrees (e.g., 33.770)")
     with col2:
@@ -277,6 +370,8 @@ def main():
             key="input_lon",
             format="%.4f",
             step=0.0001,
+            placeholder="-84.3824",
+            icon=":material/explore:",
         )
         st.caption("Longitude of the location in decimal degrees (e.g., -84.3824)")
 
@@ -287,6 +382,7 @@ def main():
             key="input_location",
             placeholder="e.g., Atlanta",
             max_chars=60,
+            icon=":material/location_city:",
         )
         st.caption("A descriptive name for the location, used to generate the output filename.")
         st.caption("💡 *Auto-updates when you select a new location on the map.*")
@@ -297,6 +393,7 @@ def main():
             value="tmy",
             placeholder="e.g., 2012, tmy, tmy-2024",
             max_chars=15,
+            icon=":material/calendar_month:",
         )
         st.caption(f"A specific year ({MIN_YEAR}–{MAX_YEAR}) or a TMY identifier like 'tmy' or 'tmy-2024'")
         st.caption("💡 *TMY (Typical Meteorological Year) datasets represent long-term average climate conditions.*")
@@ -319,43 +416,45 @@ def main():
         year_int = int(year_str)
         if year_int > MAX_YEAR:
             year_is_valid = False
-            year_warning = f"NLR does not provide data for the year {year}. Latest available year is {MAX_YEAR}."
+            year_warning = f"NLR does not provide data for the year {year}. Latest available year is {MAX_YEAR}. Please enter an earlier year."
         elif year_int < MIN_YEAR:
             year_is_valid = False
-            year_warning = (
-                f"NLR does not provide data for the year {year}. The earliest year data is available for is {MIN_YEAR}."
-            )
+            year_warning = f"NLR does not provide data for the year {year}. The earliest year data is available for is {MIN_YEAR}. Please enter a more recent year."
     else:
         if not year_str.lower().startswith(("tmy", "tgy", "tdy")):
             year_is_valid = False
             year_warning = "Year must be a numeric year (>=1998) or a TMY name like tmy or tmy-2024."
+
+    # A verified default key is usable regardless of length; any other key must
+    # be exactly API_KEY_LENGTH characters (whitespace already trimmed on load).
+    api_key_is_valid = is_api_key_valid(api_key, is_verified=(api_key_source == "default" and default_key_verified))
 
     # Full-width validation warnings below inputs
     if not location_is_valid:
         st.warning("A location name is required to generate the file.", icon="⚠️")
 
     if not year_is_valid:
-        st.warning(year_warning, icon="⚠️")
+        if year_str:
+            st.error(year_warning, icon="🛑")
+        else:
+            st.warning(year_warning, icon="⚠️")
 
     if not api_key:
-        button_help = "Please provide an API key in the configuration section to enable this button"
         st.warning("Please provide an API key in the 'API Key Configuration' section to request data.", icon="🔑")
-    elif not year_is_valid:
-        button_help = year_warning
-    elif not location_is_valid:
-        button_help = "Please provide a valid location name."
-    else:
-        button_help = "Initiates request to NLR API to download EPW file"
+    elif not api_key_is_valid:
+        st.error(
+            f"The provided API key must be exactly 40 characters long to request data. (Currently {len(api_key)} characters)",
+            icon="🛑",
+        )
 
     if st.button(
         "Request from NLR",
         type="primary",
-        help=button_help,
-        disabled=not bool(api_key) or not year_is_valid or not location_is_valid,
+        disabled=not api_key_is_valid or not year_is_valid or not location_is_valid,
         icon=":material/cloud_download:",
         use_container_width=True,
     ):
-        with st.spinner("Requesting data from NLR..."):
+        with st.spinner(f"Requesting '{year}' data for '{location}' from NLR..."):
             try:
                 file_name = download_epw(
                     lon,
@@ -385,7 +484,13 @@ def main():
                     )
                 elif api_key_source == "default":
                     st.info(
-                        "If this failure is related to the default API key, enter your own key in the API Key Configuration section and retry."
+                        "If this failure is related to the default API key, enter your own key in the API Key Configuration section and retry.",
+                        icon="💡",
+                    )
+                elif api_key_source == "user":
+                    st.info(
+                        "Please verify that your custom API key is correct and active. You can check your account at the NLR Developer portal.",
+                        icon="💡",
                     )
                 st.stop()
 

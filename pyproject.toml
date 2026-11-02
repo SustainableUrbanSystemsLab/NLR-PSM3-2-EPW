@@ -1,6 +1,6 @@
 [project]
 name = "nlr-psm-2-epw"
-version = "0.5.0"
+version = "0.5.6"
 description = "A script that writes out epw files from NLR Physical Solar Model (PSM)"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -21,23 +21,67 @@ dev = [
   "ruff>=0.1.0",
 ]
 
+
+
+
+
+
+
 [tool.pytest.ini_options]
 addopts = "--cov=nlr_psm_2_epw --cov-report=term-missing --cov-fail-under=100"
 
+
 [tool.coverage.run]
 source = ["nlr_psm_2_epw"]
+
 
 [tool.ruff]
 exclude = [".venv", "venv", "env"]
 line-length = 120
 
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
 [tool.setuptools.packages.find]
 include = ["nlr_psm_2_epw*"]
 exclude = ["app*", "tests*"]
+
+
+[tool.semantic_release]
+version_toml = [
+    "pyproject.toml:project.version",
+]
+build_command = "pip install build && python -m build"
+# This project's commits use gitmoji (the Palette/Jules bot emits "🎨 …"),
+# not Conventional Commits, so the default "conventional" parser matched
+# nothing and no release was ever cut (frozen at 0.5.0). Use the emoji parser.
+commit_parser = "emoji"
+
+[tool.semantic_release.commit_parser_options]
+major_tags = ["💥"]
+minor_tags = ["✨", "🎉", "🚀", "💫", "🌟"]
+patch_tags = [
+    "🎨",  # :art: structure/format — Palette UI commits
+    "🐛",  # :bug:
+    "🚑",  # :ambulance: hotfix
+    "⚡️", "⚡",  # :zap: performance — Bolt commits
+    "🔒", "🔐",  # :lock: security
+    "♻️",  # :recycle: refactor
+    "🔧",  # :wrench: config
+    "📝",  # :memo: docs
+    "💄",  # :lipstick: UI/style
+    "🩹",  # :adhesive_bandage: minor fix
+    "⬆️", "⬇️", "📌",  # dependency bumps / pins
+]
+
+[tool.semantic_release.branches.main]
+match = "(main|master)"
+
+
+
+
+
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
 
 [dependency-groups]
 dev = [
@@ -48,11 +92,3 @@ dev = [
     "python-semantic-release>=9.21.0",
     "ruff>=0.14.13",
 ]
-[tool.semantic_release]
-version_toml = [
-    "pyproject.toml:project.version",
-]
-build_command = "pip install build && python -m build"
-
-[tool.semantic_release.branches.main]
-match = "(main|master)"
