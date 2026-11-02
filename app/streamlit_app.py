@@ -368,7 +368,13 @@ def main():
                 st.error("Request failed: The data could not be retrieved from NLR.", icon="❌")
                 with st.expander("🛠️ View technical details"):
                     st.code(str(exc), language="text")
-                if api_key_source == "default":
+                if "No data available at the provided location" in str(exc):
+                    st.warning(
+                        "NLR has no data for this point. GOES covers the Americas (roughly 20°W to 180°W); "
+                        "pick a location there.",
+                        icon="🌍",
+                    )
+                elif api_key_source == "default":
                     st.info(
                         "If this failure is related to the default API key, enter your own key in the API Key Configuration section and retry."
                     )
