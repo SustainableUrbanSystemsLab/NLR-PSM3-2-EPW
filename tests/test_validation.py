@@ -1,6 +1,6 @@
 import hashlib
 
-from nlr_psm3_2_epw.validation import (
+from nlr_psm_2_epw.validation import (
     API_KEY_LENGTH,
     is_api_key_valid,
     is_api_key_verified,

@@ -11,11 +11,11 @@ import streamlit.components.v1 as components
 import folium
 from streamlit_folium import st_folium
 
-__version__ = version("nlr-psm3-2-epw")
+__version__ = version("nlr-psm-2-epw")
 
-from nlr_psm3_2_epw.assets import download_epw
-from nlr_psm3_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL
-from nlr_psm3_2_epw.validation import (
+from nlr_psm_2_epw.assets import download_epw
+from nlr_psm_2_epw.constants import DEVELOPER_DOCS_URL, DEVELOPER_SIGNUP_URL, GOES_BOUNDS, MAX_YEAR, MIN_YEAR
+from nlr_psm_2_epw.validation import (
     API_KEY_LENGTH,
     is_api_key_valid,
     is_api_key_verified,
@@ -23,17 +23,17 @@ from nlr_psm3_2_epw.validation import (
 )
 
 # --- SEO METADATA ---
-SEO_TITLE = "PSM3 to EPW Converter — NREL / NSRDB EnergyPlus Weather Files"
+SEO_TITLE = "NLR PSM to EPW Converter — NSRDB EnergyPlus Weather Files"
 SEO_DESCRIPTION = (
-    "Free web app to convert NREL PSM v3/v4 (NSRDB) solar climate data into EnergyPlus "
+    "Free web app to convert NLR PSM (NSRDB) solar climate data into EnergyPlus "
     "Weather (EPW) files for building energy simulation. Pick a location by latitude/"
     "longitude and download a TMY or single-year EPW file."
 )
 SEO_KEYWORDS = (
-    "EPW, EnergyPlus Weather, PSM3, PSM v4, NSRDB, NREL, TMY, typical meteorological year, "
+    "EPW, EnergyPlus Weather, PSM, NSRDB, NLR, TMY, typical meteorological year, "
     "solar radiation, GHI, DNI, DHI, building energy simulation, weather file converter, climate data"
 )
-SEO_URL = "https://nrel-psm3-2-epw.streamlit.app/"
+SEO_URL = "https://nlr-psm-2-epw.streamlit.app/"
 
 # --- CONSTANTS ---
 ATTRIBUTES = (
@@ -49,7 +49,6 @@ YOUR_AFFILIATION = "aaa"
 YOUR_EMAIL = "Joe@Doe.edu"
 MAILING_LIST = "false"
 LEAP_YEAR = "false"
-MIN_YEAR = 1998
 VALID_API_KEY_HASH = "1c2c12cf359f7aba48e0aaf39ac031d98fee2418f3c4e482ec1044904032fefe"
 
 
@@ -108,7 +107,7 @@ def get_location_name(lat: float, lon: float) -> str:
     Returns a meaningful location name or 'Unknown Location' if it fails.
     """
     url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}"
-    headers = {"User-Agent": f"NLR-PSM3-2-EPW-App/{__version__}"}
+    headers = {"User-Agent": f"NLR-PSM-2-EPW-App/{__version__}"}
     try:
         response = requests.get(url, headers=headers, timeout=5)
         response.raise_for_status()
@@ -147,7 +146,16 @@ def get_map():
     This saves CPU time and prevents the frontend from fully destroying and
     re-rendering the map iframe during unrelated app interactions (like typing in text inputs).
     """
-    m = folium.Map(location=[33.770, -84.3824], zoom_start=4)
+    m = folium.Map(
+        location=[33.770, -84.3824],
+        zoom_start=4,
+        min_zoom=2,
+        max_bounds=True,
+        min_lat=GOES_BOUNDS[0][0],
+        max_lat=GOES_BOUNDS[1][0],
+        min_lon=GOES_BOUNDS[0][1],
+        max_lon=GOES_BOUNDS[1][1],
+    )
     m.add_child(folium.LatLngPopup())
     return m
 
@@ -223,7 +231,7 @@ def _inject_seo_meta() -> None:
 def main():
     st.set_page_config(page_title=SEO_TITLE, page_icon="☀️")
     _inject_seo_meta()
-    st.title("NLR Climate to EPW Converter")
+    st.title("NLR PSM to EPW")
     st.caption(f"**Version {__version__}**")
     st.markdown(
         "Easily convert physical solar model data from NLR into the EnergyPlus Weather (EPW) format for building energy simulation."
@@ -294,8 +302,9 @@ def main():
     if "input_lon" not in st.session_state:
         st.session_state.input_lon = -84.3824
 
-    # Default location string
-    default_location = "Atlanta"
+    if "input_location" not in st.session_state:
+        st.session_state.input_location = "Atlanta"
+        st.session_state.loc_coords = (st.session_state.input_lat, st.session_state.input_lon)
 
     # Bolt Optimization:
     # Use returned_objects=["last_clicked"] to prevent Streamlit from completely rerunning
@@ -334,10 +343,11 @@ def main():
     lat = st.session_state.input_lat
     lon = st.session_state.input_lon
 
-    # Check if current lat/lon differs from default before reverse geocoding to pre-fill location input
-    if lat != 33.770 or lon != -84.3824:
+    # Keyed widget state is the only reliable way to overwrite the name; a changing `value=` is not.
+    if st.session_state.loc_coords != (lat, lon):
+        st.session_state.loc_coords = (lat, lon)
         loc_name = get_location_name(lat, lon)
-        default_location = loc_name if loc_name != "Unknown Location" else ""
+        st.session_state.input_location = loc_name if loc_name != "Unknown Location" else ""
 
     col1, col2 = st.columns(2)
     with col1:
@@ -369,7 +379,7 @@ def main():
     with col3:
         location = st.text_input(
             "Location Name (required)",
-            value=default_location,
+            key="input_location",
             placeholder="e.g., Atlanta",
             max_chars=60,
             icon=":material/location_city:",
@@ -385,7 +395,7 @@ def main():
             max_chars=15,
             icon=":material/calendar_month:",
         )
-        st.caption("A specific year (>=1998) or a TMY identifier like 'tmy' or 'tmy-2024'")
+        st.caption(f"A specific year ({MIN_YEAR}–{MAX_YEAR}) or a TMY identifier like 'tmy' or 'tmy-2024'")
         st.caption("💡 *TMY (Typical Meteorological Year) datasets represent long-term average climate conditions.*")
 
     current_year = datetime.now().year
@@ -404,12 +414,9 @@ def main():
         year_warning = "A year or TMY identifier is required."
     elif year_str.isdigit():
         year_int = int(year_str)
-        if year_int >= current_year - 1:
+        if year_int > MAX_YEAR:
             year_is_valid = False
-            year_warning = (
-                f"NLR does not provide data for the year {year}. "
-                f"Data is typically only available up to {current_year - 2}. Please enter an earlier year."
-            )
+            year_warning = f"NLR does not provide data for the year {year}. Latest available year is {MAX_YEAR}. Please enter an earlier year."
         elif year_int < MIN_YEAR:
             year_is_valid = False
             year_warning = f"NLR does not provide data for the year {year}. The earliest year data is available for is {MIN_YEAR}. Please enter a more recent year."
@@ -469,7 +476,13 @@ def main():
                 st.error("Request failed: The data could not be retrieved from NLR.", icon="❌")
                 with st.expander("🛠️ View technical details"):
                     st.code(str(exc), language="text")
-                if api_key_source == "default":
+                if "No data available at the provided location" in str(exc):
+                    st.warning(
+                        "NLR has no data for this point. GOES covers the Americas (roughly 20°W to 180°W); "
+                        "pick a location there.",
+                        icon="🌍",
+                    )
+                elif api_key_source == "default":
                     st.info(
                         "If this failure is related to the default API key, enter your own key in the API Key Configuration section and retry.",
                         icon="💡",

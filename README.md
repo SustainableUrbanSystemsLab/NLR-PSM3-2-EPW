@@ -1,17 +1,17 @@
-# NLR-PSM3-2-EPW — Convert NREL PSM3 / NSRDB Solar Data to EnergyPlus EPW Weather Files
+# NLR-PSM-2-EPW — Convert NLR PSM / NSRDB Solar Data to EnergyPlus EPW Weather Files
 
-[![Build-Test](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/actions/workflows/build-test.yml)
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://nrel-psm3-2-epw.streamlit.app/)
-[![Latest Release](https://img.shields.io/github/v/release/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW?label=release)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW/releases)
+[![Build-Test](https://github.com/SustainableUrbanSystemsLab/NLR-PSM-2-EPW/actions/workflows/build-test.yml/badge.svg?branch=main)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM-2-EPW/actions/workflows/build-test.yml)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://nlr-psm-2-epw.streamlit.app/)
+[![Latest Release](https://img.shields.io/github/v/release/SustainableUrbanSystemsLab/NLR-PSM-2-EPW?label=release)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM-2-EPW/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**NLR-PSM3-2-EPW** is a free, open-source Python tool and Streamlit web app that converts
-**NREL Physical Solar Model (PSM v3.2.2 / v4.0.0, NSRDB)** solar and meteorological data into
+**NLR-PSM-2-EPW** is a free, open-source Python tool and Streamlit web app that converts
+**NLR Physical Solar Model (PSM, NSRDB)** solar and meteorological data into
 **EnergyPlus Weather (EPW)** files for building energy simulation. Pick any location by
 latitude / longitude and download a ready-to-use `.epw` for a specific year or a
 **Typical Meteorological Year (TMY)**.
 
-👉 **Try the live app:** <https://nrel-psm3-2-epw.streamlit.app/>
+👉 **Try the live app:** <https://nlr-psm-2-epw.streamlit.app/>
 
 ## What it does
 
@@ -29,7 +29,7 @@ on a map, choose a year or TMY, and download the weather file.
 
 ## Features
 
-- **PSM3 / NSRDB → EPW conversion** — turns NREL solar climate data into EnergyPlus Weather format.
+- **PSM / NSRDB → EPW conversion** — turns NLR solar climate data into EnergyPlus Weather format.
 - **Interactive map** — pick a location by clicking, or enter latitude / longitude manually.
 - **TMY and single-year datasets** — download `tmy`, `tgy`, `tdy`, or a specific historical year (≥ 1998).
 - **Resilient downloads** — automatically falls back to core attributes when a dataset is
@@ -46,7 +46,7 @@ starting point for energy modeling, daylighting and thermal-comfort analysis.
 
 ## Keywords
 
-`EPW` · `EnergyPlus Weather file` · `PSM3` · `PSM v4` · `NSRDB` · `NREL` · `TMY` ·
+`EPW` · `EnergyPlus Weather file` · `PSM` · `NSRDB` · `NLR` · `TMY` ·
 `typical meteorological year` · `solar radiation data` · `GHI / DNI / DHI` ·
 `building energy simulation` · `weather data converter` · `climate data`
 
@@ -55,7 +55,7 @@ starting point for energy modeling, daylighting and thermal-comfort analysis.
 - `app/`: Streamlit application.
     - `streamlit_app.py`: Main entry point.
     - `.streamlit/secrets.toml`: (Not committed) Stores your API key.
-- `nlr_psm3_2_epw/`: Core transformation logic (NSRDB download + EPW writer).
+- `nlr_psm_2_epw/`: Core transformation logic (NSRDB download + EPW writer).
 - `tests/`: Unit and integration tests (100% coverage).
 
 ## How to Run Locally
@@ -93,7 +93,7 @@ starting point for energy modeling, daylighting and thermal-comfort analysis.
 
 ## Demo
 
-Live Streamlit app: <https://nrel-psm3-2-epw.streamlit.app/>
+Live Streamlit app: <https://nlr-psm-2-epw.streamlit.app/>
 
 ## License
 

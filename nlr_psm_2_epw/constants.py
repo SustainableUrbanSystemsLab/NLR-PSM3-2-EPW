@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
+from datetime import datetime
 
 DEVELOPER_BASE_URL = "https://developer.nlr.gov"
-DEVELOPER_DOCS_URL = DEVELOPER_BASE_URL
+DEVELOPER_DOCS_URL = f"{DEVELOPER_BASE_URL}/docs/solar/nsrdb/nsrdb-GOES-aggregated-v4-0-0-download/"
 DEVELOPER_SIGNUP_URL = f"{DEVELOPER_BASE_URL}/signup"
+
+MIN_YEAR = 1998
+# shortcut: assumes last full year is published; API rejects it if NLR lags, no endpoint lists years
+MAX_YEAR = datetime.now().year - 1
+
+# shortcut: approximate GOES coverage (Americas), not from NLR docs; refine against their coverage map
+GOES_BOUNDS = [[-60.0, -180.0], [60.0, -20.0]]  # [[south, west], [north, east]]
 
 GOES_AGGREGATED_URL = f"{DEVELOPER_BASE_URL}/api/nsrdb/v2/solar/nsrdb-GOES-aggregated-v4-0-0-download.csv"
 GOES_TMY_URL = f"{DEVELOPER_BASE_URL}/api/nsrdb/v2/solar/nsrdb-GOES-tmy-v4-0-0-download.csv"
@@ -12,7 +20,7 @@ DEFAULT_HEADERS = {
         "PlaceHolder",  # Was location
         "STATE",
         "COUNTRY",
-        "NLR PSM v4 SOURCE",
+        "NLR PSM SOURCE",
         "XXX",
         "0",  # Was lat
         "0",  # Was lon
@@ -169,7 +177,7 @@ DEFAULT_HEADERS = {
         "13.60",
     ],
     "HOLIDAYS/DAYLIGHT SAVINGS": ["No", "0", "0", "0"],
-    "COMMENTS 1": ["NLR PSM3 DATA"],
-    "COMMENTS 2": ["https://github.com/SustainableUrbanSystemsLab/NLR-PSM3-2-EPW"],
+    "COMMENTS 1": ["NLR PSM DATA"],
+    "COMMENTS 2": ["https://github.com/SustainableUrbanSystemsLab/NLR-PSM-2-EPW"],
     "DATA PERIODS": ["1", "1", "Data", "Sunday", " 1/ 1", "12/31"],
 }
