@@ -202,8 +202,9 @@ def main():
     if "input_lon" not in st.session_state:
         st.session_state.input_lon = -84.3824
 
-    # Default location string
-    default_location = "Atlanta"
+    if "input_location" not in st.session_state:
+        st.session_state.input_location = "Atlanta"
+        st.session_state.loc_coords = (st.session_state.input_lat, st.session_state.input_lon)
 
     # Bolt Optimization:
     # Use returned_objects=["last_clicked"] to prevent Streamlit from completely rerunning
@@ -242,10 +243,11 @@ def main():
     lat = st.session_state.input_lat
     lon = st.session_state.input_lon
 
-    # Check if current lat/lon differs from default before reverse geocoding to pre-fill location input
-    if lat != 33.770 or lon != -84.3824:
+    # Keyed widget state is the only reliable way to overwrite the name; a changing `value=` is not.
+    if st.session_state.loc_coords != (lat, lon):
+        st.session_state.loc_coords = (lat, lon)
         loc_name = get_location_name(lat, lon)
-        default_location = loc_name if loc_name != "Unknown Location" else ""
+        st.session_state.input_location = loc_name if loc_name != "Unknown Location" else ""
 
     col1, col2 = st.columns(2)
     with col1:
@@ -273,7 +275,7 @@ def main():
     with col3:
         location = st.text_input(
             "Location Name (required)",
-            value=default_location,
+            key="input_location",
             placeholder="e.g., Atlanta",
             max_chars=60,
         )
