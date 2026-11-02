@@ -156,12 +156,14 @@ def test_download_epw_non_ok_json(monkeypatch):
 
     monkeypatch.setattr(assets._session, "request", lambda *args, **kwargs: response)
 
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(assets.NLRError) as exc:
         assets.download_epw(
             0, 0, 2012, "Loc", "ghi", "60", "false", "Name", "key", "reason", "aff", "email", "false", "false"
         )
 
     assert "api_key" not in str(exc.value)
+    assert exc.value.status == 400
+    assert exc.value.messages == ["bad request"]
 
 
 def test_download_epw_non_ok_non_json(monkeypatch):
@@ -175,12 +177,13 @@ def test_download_epw_non_ok_non_json(monkeypatch):
 
     monkeypatch.setattr(assets._session, "request", lambda *args, **kwargs: response)
 
-    with pytest.raises(RuntimeError) as exc:
+    with pytest.raises(assets.NLRError) as exc:
         assets.download_epw(
             0, 0, 2012, "Loc", "ghi", "60", "false", "Name", "key", "reason", "aff", "email", "false", "false"
         )
 
     assert "Not Found" in str(exc.value)
+    assert exc.value.messages == ["Not Found"]
 
 
 def test_download_epw_request_connection_error(monkeypatch):

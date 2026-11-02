@@ -5,96 +5,69 @@
 [![Latest Release](https://img.shields.io/github/v/release/SustainableUrbanSystemsLab/NLR-PSM-2-EPW?label=release)](https://github.com/SustainableUrbanSystemsLab/NLR-PSM-2-EPW/releases)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-**NLR-PSM-2-EPW** is a free, open-source Python tool and Streamlit web app that converts
-**NLR Physical Solar Model (PSM, NSRDB)** solar and meteorological data into
-**EnergyPlus Weather (EPW)** files for building energy simulation. Pick any location by
-latitude / longitude and download a ready-to-use `.epw` for a specific year or a
-**Typical Meteorological Year (TMY)**.
+Free, open-source Python tool and Streamlit app that turns **NLR Physical Solar Model (PSM, NSRDB)**
+data into **EnergyPlus Weather (EPW)** files. Click a point on the map, pick a year or a
+**Typical Meteorological Year (TMY)**, and download a ready-to-use `.epw`.
 
-👉 **Try the live app:** <https://nlr-psm-2-epw.streamlit.app/>
+👉 **Live app:** <https://nlr-psm-2-epw.streamlit.app/>
 
-## What it does
+> **Coverage:** the GOES dataset covers the Americas only. Points elsewhere return "No data available".
 
-Downloads solar irradiance (**GHI, DNI, DHI**), dry-bulb temperature, dew point, relative
-humidity, atmospheric pressure, wind speed/direction, cloud cover, surface albedo and
-precipitable water from the **NSRDB** API, then writes a standards-compliant **EPW** weather
-file compatible with **EnergyPlus, OpenStudio, Ladybug / Honeybee, DesignBuilder, IES-VE**
-and other building-performance simulation tools.
+<details>
+<summary><b>Features</b></summary>
 
-## Why
+- **Interactive map** — click a location or enter latitude / longitude.
+- **TMY and single-year data** — `tmy`, `tgy`, `tdy`, or a specific year (1998 to last full year).
+- **Resilient downloads** — falls back to core attributes when a dataset is sparse at a location.
+- **Secure** — API key via Streamlit secrets, verified with a hash check.
+- **Modern stack** — `uv`, `ruff`, 100% unit-test coverage.
 
-Getting hourly weather data into an EnergyPlus-ready EPW file usually means manual API calls
-and column wrangling. This tool automates the full **NSRDB → EPW** pipeline — click a point
-on a map, choose a year or TMY, and download the weather file.
+</details>
 
-## Features
+<details>
+<summary><b>What is an EPW file?</b></summary>
 
-- **PSM / NSRDB → EPW conversion** — turns NLR solar climate data into EnergyPlus Weather format.
-- **Interactive map** — pick a location by clicking, or enter latitude / longitude manually.
-- **TMY and single-year datasets** — download `tmy`, `tgy`, `tdy`, or a specific historical year (≥ 1998).
-- **Resilient downloads** — automatically falls back to core attributes when a dataset is
-  sparse at a location, so remote points still produce a valid EPW.
-- **Secure** — API keys are managed via Streamlit secrets and verified with a hash check.
-- **Modern stack** — `uv` for dependency management, `ruff` for linting, 100% unit-test coverage.
+The standard hourly weather format used by EnergyPlus, OpenStudio, Ladybug / Honeybee,
+DesignBuilder, IES-VE and most building energy simulation tools. One file holds a full year
+(8760 hours) of solar, temperature, humidity, wind and sky-cover data for one location.
 
-## What is an EPW file?
+</details>
 
-An **EnergyPlus Weather (EPW)** file is the standard hourly weather format consumed by
-EnergyPlus and most building energy simulation engines. It contains a full year (8760 hours)
-of solar, temperature, humidity, wind and sky-cover data for a single location, and is the
-starting point for energy modeling, daylighting and thermal-comfort analysis.
+<details>
+<summary><b>Run locally</b></summary>
 
-## Keywords
+```bash
+uv sync --extra dev                                # install
+uv run streamlit run app/streamlit_app.py          # run (Windows: run_streamlit.bat)
+uv run pytest                                      # test
+uv run ruff check --fix . && uv run ruff format .  # lint & format
+```
 
-`EPW` · `EnergyPlus Weather file` · `PSM` · `NSRDB` · `NLR` · `TMY` ·
-`typical meteorological year` · `solar radiation data` · `GHI / DNI / DHI` ·
-`building energy simulation` · `weather data converter` · `climate data`
+API key: create `app/.streamlit/secrets.toml` with
 
-## Project Structure
+```toml
+APIKEY = "YOUR_NLR_API_KEY"
+```
 
-- `app/`: Streamlit application.
-    - `streamlit_app.py`: Main entry point.
-    - `.streamlit/secrets.toml`: (Not committed) Stores your API key.
-- `nlr_psm_2_epw/`: Core transformation logic (NSRDB download + EPW writer).
-- `tests/`: Unit and integration tests (100% coverage).
+Get a key at <https://developer.nlr.gov/signup>; docs at <https://developer.nlr.gov>.
 
-## How to Run Locally
+</details>
 
-1. **Install dependencies with uv**:
-    ```bash
-    uv sync --extra dev
-    ```
+<details>
+<summary><b>Project structure</b></summary>
 
-2. **Configure your API key**:
-    - Create `app/.streamlit/secrets.toml`:
-        ```toml
-        APIKEY = "YOUR_NLR_API_KEY"
-        ```
-    - Request or manage your API key at <https://developer.nlr.gov/signup>
-    - API documentation is available at <https://developer.nlr.gov>
-    - *Note: the app verifies the default API key integrity.*
+- `app/streamlit_app.py` — Streamlit entry point.
+- `nlr_psm_2_epw/` — NSRDB download + EPW writer.
+- `tests/` — unit and integration tests (100% coverage).
 
-3. **Run the app**:
-    ```bash
-    uv run streamlit run app/streamlit_app.py
-    ```
-    *(Windows users can use `run_streamlit.bat`.)*
+</details>
 
-4. **Run tests**:
-    ```bash
-    uv run pytest
-    ```
+<details>
+<summary><b>Keywords</b></summary>
 
-5. **Lint & format**:
-    ```bash
-    uv run ruff check --fix .
-    uv run ruff format .
-    ```
+`EPW` · `EnergyPlus Weather file` · `PSM` · `NSRDB` · `NLR` · `TMY` · `typical meteorological year` ·
+`solar radiation data` · `GHI / DNI / DHI` · `building energy simulation` · `weather data converter` · `climate data`
 
-## Demo
-
-Live Streamlit app: <https://nlr-psm-2-epw.streamlit.app/>
-
-## License
+</details>
 
 Released under the [MIT License](LICENSE).
